@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feylesof · Mantık Analiz</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fafaf8;--bg2:#f0ede6;--text:#1a1814;--text2:#6c6760;
+  --accent:#7a1f1f;--green:#1a5c2a;--border:#d4cfc7;
+  --blue:#1a4c8b;--blue-bg:#f0f4ff;--blue-bd:#a0b8d8;
+  --red-bg:#fff8f8;--red-bd:#c4a0a0;
+  --grn-bg:#f5fff7;--grn-bd:#a0c4a8;
+  --pur:#5a1a7a;--pur-bg:#f8f0ff;--pur-bd:#c0a0d8;
+  --mono:'JetBrains Mono',monospace;--serif:'EB Garamond',Georgia,serif;
+}
+body{font-family:var(--serif);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+header{border-bottom:2.5px solid var(--text);padding:1.3rem 2.4rem}
+header h1{font-size:1.95rem;font-weight:400}
+header h1 span{font-size:.71rem;color:var(--text2);display:block;font-family:var(--mono);margin-top:.2rem;letter-spacing:.9px;text-transform:uppercase}
+.app{display:grid;grid-template-columns:230px 1fr;flex:1}
+
+/* ── PALETTE ── */
+.pal{border-right:1.5px solid var(--border);padding:1.15rem .9rem;background:var(--bg2);overflow-y:auto}
+.pg{margin-bottom:1.4rem}
+.pgl{font-family:var(--mono);font-size:.61rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:.48rem;padding-bottom:.22rem;border-bottom:1px solid var(--border)}
+.toks{display:flex;flex-wrap:wrap;gap:.28rem}
+.tok{display:inline-flex;align-items:center;justify-content:center;padding:.28rem .55rem;font-family:var(--mono);font-size:.75rem;font-weight:600;border:1.5px solid var(--border);background:#fff;cursor:grab;user-select:none;transition:transform .1s,box-shadow .1s,border-color .15s;white-space:nowrap}
+.tok:hover{border-color:var(--text);transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.tok:active{cursor:grabbing}
+.tok.tv{color:var(--blue);border-color:var(--blue-bd);background:var(--blue-bg)}
+.tok.tu{color:var(--accent);border-color:var(--red-bd);background:var(--red-bg)}
+.tok.tb{color:var(--green);border-color:var(--grn-bd);background:var(--grn-bg)}
+.tok.tt{color:var(--pur);border-color:var(--pur-bd);background:var(--pur-bg)}
+.tok.dragging{opacity:.25;transform:scale(.92)}
+.tok.disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.cvar{width:100%;margin-top:.5rem;font-family:var(--mono);font-size:.75rem;padding:.28rem .48rem;border:1.5px solid var(--border);background:#fff;color:var(--text);outline:none;transition:border-color .15s}
+.cvar:focus{border-color:var(--text)}
+.cvar::placeholder{color:var(--text2)}
+.pal-hint{font-family:var(--mono);font-size:.64rem;color:var(--text2);line-height:2}
+
+/* ── CANVAS ── */
+.cnv{overflow-y:auto;padding:1.55rem 1.9rem}
+.sec{margin-bottom:1.85rem}
+.sech{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem}
+.secl{font-family:var(--mono);font-size:.61rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.4px}
+
+/* ── PROP CARDS ── */
+.plist{display:flex;gap:.5rem;flex-wrap:wrap;align-items:stretch}
+.pc{border:1.5px solid var(--border);background:#fff;padding:.5rem .65rem;min-width:126px;max-width:185px;cursor:pointer;transition:border-color .15s,box-shadow .12s;flex-shrink:0}
+.pc:hover{border-color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.pc.active{border-color:var(--text);border-left:3px solid var(--text)}
+.pc.active.ok{border-left-color:var(--green)}
+.pct{display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem}
+.pcn{font-family:var(--mono);font-size:.79rem;font-weight:600;flex:1;min-width:0}
+.pcok{font-size:.68rem;color:var(--green);font-family:var(--mono)}
+.pcf{font-family:var(--mono);font-size:.67rem;color:var(--text2);word-break:break-all;line-height:1.38;max-height:2.7em;overflow:hidden}
+.pcd{background:none;border:none;color:var(--text2);cursor:pointer;font-size:.86rem;padding:0;line-height:1;transition:color .12s;flex-shrink:0}
+.pcd:hover{color:var(--accent)}
+.pc-add{border:1.5px dashed var(--border);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.16rem;padding:.62rem 1rem;cursor:pointer;font-family:var(--mono);font-size:.75rem;color:var(--text2);transition:all .15s;min-width:68px}
+.pc-add:hover{border-color:var(--text);color:var(--text);background:var(--bg2)}
+.pe{font-family:var(--mono);font-size:.78rem;color:var(--text2);font-style:italic;padding:.35rem 0}
+
+/* ── EDITOR ── */
+.fbar{background:var(--bg2);border:1.5px solid var(--border);padding:.55rem .9rem;font-family:var(--mono);font-size:.88rem;min-height:2.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.fbar .ph{color:var(--text2);font-size:.78rem}
+.fbar .wn{color:var(--accent);font-size:.68rem}
+.tw{min-height:62px;padding:.75rem;background:#fff;border:1.5px solid var(--border);margin-bottom:1rem;overflow-x:auto;display:flex;align-items:flex-start;flex-wrap:wrap;gap:.35rem}
+.slot{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:28px;border:1.5px dashed var(--border);font-family:var(--mono);font-size:.71rem;color:var(--text2);padding:.15rem .4rem;transition:border-color .15s,background .15s;vertical-align:middle}
+.slot.over{border-color:var(--text);background:var(--bg2);border-style:solid}
+.nv{display:inline-flex;align-items:center;gap:.25rem;border:1.5px solid var(--blue-bd);background:var(--blue-bg);padding:.16rem .5rem;font-family:var(--mono);font-size:.94rem;color:var(--blue);font-weight:700;vertical-align:middle}
+.nu,.nb{display:inline-flex;align-items:center;gap:.18rem;padding:.14rem .26rem;vertical-align:middle}
+.nu{border:1.5px solid var(--red-bd);background:var(--red-bg)}
+.nb{border:1.5px solid var(--grn-bd);background:var(--grn-bg)}
+.nb.nt{border-color:var(--pur-bd);background:var(--pur-bg)}
+.ops{font-family:var(--mono);font-size:.86rem;font-weight:700;padding:0 .18rem}
+.ops.u{color:var(--accent)}.ops.b{color:var(--green)}.ops.t{color:var(--pur)}
+.dl{display:inline-flex;align-items:center;justify-content:center;width:.98rem;height:.98rem;padding:0;margin-left:.14rem;background:transparent;border:1px solid var(--border);color:var(--text2);font-size:.59rem;cursor:pointer;line-height:1;transition:all .12s;flex-shrink:0}
+.dl:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── BUTTONS ── */
+.btn{background:var(--text);color:var(--bg);border:none;padding:.45rem 1.25rem;font-family:var(--mono);font-size:.7rem;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:background .15s}
+.btn:hover{background:var(--accent)}
+.btng{background:transparent;color:var(--text);border:1.5px solid var(--border);padding:.4rem .9rem;font-family:var(--mono);font-size:.7rem;cursor:pointer;transition:all .15s}
+.btng:hover{border-color:var(--text);background:var(--bg2)}
+
+/* ── ANALYSIS ── */
+.lbl{font-family:var(--mono);font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:.4rem}
+.chk-row{display:flex;align-items:center;gap:.42rem;padding:.2rem 0;font-family:var(--mono);font-size:.76rem}
+.nb2{display:inline-block;padding:.06rem .4rem;background:var(--bg2);border:1px solid var(--border);font-size:.68rem;font-weight:600;flex-shrink:0}
+.fml{color:var(--text2);font-size:.71rem}
+.arow{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem}
+
+/* ── TRUTH TABLE ── */
+.tblw{overflow-x:auto;margin-bottom:.9rem}
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:.8rem;min-width:100%}
+table.tt th{border-bottom:2px solid var(--text);padding:.28rem .68rem;text-align:center;font-weight:600;background:var(--bg2);white-space:nowrap}
+table.tt th.sp{border-left:2.5px solid var(--text)}
+table.tt th.main-h{background:#e8e4dc}
+table.tt td{border-bottom:1px solid var(--border);padding:.22rem .68rem;text-align:center}
+table.tt td.sp{border-left:2.5px solid var(--text)}
+table.tt tr.rt td{background:#edf7f0}
+table.tt tr.rf td{background:#fef0ee}
+.vD{color:var(--green);font-weight:700}
+.vY{color:var(--accent);font-weight:700}
+
+/* ── RESULT CARDS ── */
+.rcards{display:flex;flex-direction:column;gap:.7rem}
+.rcard{border:1.5px solid var(--border);background:#fff;padding:.7rem .9rem}
+.rcard-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.45rem;font-family:var(--mono);font-size:.78rem;font-weight:600}
+.rcard-fml{font-family:var(--mono);font-size:.71rem;color:var(--text2);margin-bottom:.5rem;padding:.3rem .6rem;background:var(--bg2);border-left:2px solid var(--border)}
+.badges{display:flex;flex-wrap:wrap;gap:.38rem;margin-bottom:.3rem}
+.badge{display:inline-block;padding:.12rem .62rem;font-family:var(--mono);font-size:.67rem;border:1px solid}
+.b-tot{color:var(--green);border-color:var(--green);background:#e8f7ed}
+.b-cel{color:var(--accent);border-color:var(--accent);background:#fff0ed}
+.b-olu{color:var(--blue);border-color:var(--blue);background:#eef4ff}
+.b-ok{color:var(--green);border-color:var(--green);background:#e8f7ed}
+.b-no{color:var(--accent);border-color:var(--accent);background:#fff0ed}
+.b-eq{color:var(--pur);border-color:var(--pur-bd);background:var(--pur-bg)}
+.rn{font-family:var(--mono);font-size:.72rem;color:var(--text2);line-height:1.7}
+.eq-card{border:1.5px solid var(--border);background:#fff;padding:.65rem .9rem}
+.eq-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.35rem;font-family:var(--mono);font-size:.77rem;font-weight:600}
+.eq-sym{font-size:1.1rem}
+.hint{font-family:var(--mono);font-size:.76rem;color:var(--text2);font-style:italic;padding:.35rem 0}
+.err{background:#fff0f0;border:1px solid var(--red-bd);color:var(--accent);padding:.48rem .8rem;font-family:var(--mono);font-size:.75rem;margin-top:.4rem}
+.legend{display:flex;flex-wrap:wrap;gap:.52rem;margin-bottom:.72rem;font-family:var(--mono);font-size:.67rem;color:var(--text2)}
+.li{display:flex;align-items:center;gap:.3rem}
+.ls{width:1rem;height:.68rem;border:1px solid rgba(0,0,0,.1)}
+.ls-t{background:#edf7f0}.ls-f{background:#fef0ee}
+
+/* ── THE NOTE ── */
+.the-note{font-family:var(--mono);font-size:.68rem;color:var(--pur);padding:.3rem .6rem;background:var(--pur-bg);border:1px solid var(--pur-bd);margin-top:.5rem}
+
+@keyframes fup{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fi{animation:fup .22s ease both}
+</style>
+</head>
+<body>
+<header>
+  <h1><div style="cursor: pointer" onclick="window.location.href = '/'">Feylesof</div>
+    <span>Önerme Oluşturucu · Tutarlılık · Geçerlilik · Eşdeğerlik</span>
+  </h1>
+</header>
+
+<div class="app">
+  <!-- PALETTE -->
+  <aside class="pal">
+    <div class="pg">
+      <div class="pgl">Değişkenler</div>
+      <div class="toks" id="vt"></div>
+      <input class="cvar" id="cvar" type="text" placeholder="Özel (Enter)..." maxlength="5" autocomplete="off">
+    </div>
+    <div class="pg">
+      <div class="pgl">Tekli</div>
+      <div class="toks">
+        <div class="tok tu" draggable="true" data-type="not">&#172; DEĞIL</div>
+      </div>
+    </div>
+    <div class="pg">
+      <div class="pgl">İkili</div>
+      <div class="toks">
+        <div class="tok tb" draggable="true" data-type="and">&#8743; VE</div>
+        <div class="tok tb" draggable="true" data-type="or">&#8744; VEYA</div>
+        <div class="tok tb" draggable="true" data-type="imp">&#8594; EGSART</div>
+        <div class="tok tb" draggable="true" data-type="iff">&#8596; DKSART</div>
+      </div>
+    </div>
+    <div class="pg">
+      <div class="pgl">Çıkarım</div>
+      <div class="toks">
+        <div class="tok tt" id="tok-the" draggable="true" data-type="the">&#8756; O HALDE</div>
+      </div>
+      <div class="the-note">Yalnızca kök konumunda kullanılabilir.</div>
+    </div>
+  </aside>
+
+  <!-- CANVAS -->
+  <main class="cnv">
+
+    <!-- PROPS LIST -->
+    <section class="sec">
+      <div class="sech"><span class="secl">Önermeler</span></div>
+      <div class="plist" id="plist"></div>
+    </section>
+
+    <!-- EDITOR -->
+    <section class="sec" id="sec-ed" style="display:none">
+      <div class="sech">
+        <span class="secl">Düzenleyici &mdash; <strong id="ed-lbl"></strong></span>
+        <button class="btng" onclick="clearAT()">Ağacı Temizle</button>
+      </div>
+      <div class="fbar" id="fbar"><span class="ph">Paletten bir blok sürükleyip &#8853; yuvasına bırakın...</span></div>
+      <div class="tw" id="tw"></div>
+    </section>
+
+    <!-- ANALYSIS -->
+    <section class="sec">
+      <div class="sech"><span class="secl">Analiz</span></div>
+      <div id="ana-sw"></div>
+      <div id="ana-res"></div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// LOGIC CORE
+// ═══════════════════════════════════════════════
+
+function ps(n){
+  if(!n)return'?';
+  switch(n.type){
+    case'var':return n.name;
+    case'not':return'\u00AC('+ps(n.value)+')';
+    case'and':return'('+ps(n.left)+'\u2227'+ps(n.right)+')';
+    case'or': return'('+ps(n.left)+'\u2228'+ps(n.right)+')';
+    case'imp':return'('+ps(n.left)+'\u2192'+ps(n.right)+')';
+    case'iff':return'('+ps(n.left)+'\u2194'+ps(n.right)+')';
+    case'the':return ps(n.left)+' \u2234 '+ps(n.right); // no outer parens for ∴
+    default:return'?';
+  }
+}
+
+function isOk(n){
+  if(!n)return false;
+  if(n.type==='var')return true;
+  if(n.type==='not')return isOk(n.value);
+  return isOk(n.left)&&isOk(n.right);
+}
+
+// ∴ evaluates as → (material implication)
+function ev(n,v){
+  switch(n.type){
+    case'var':return!!v[n.name];
+    case'not':return!ev(n.value,v);
+    case'and':return ev(n.left,v)&&ev(n.right,v);
+    case'or': return ev(n.left,v)||ev(n.right,v);
+    case'imp':return!ev(n.left,v)||ev(n.right,v);
+    case'iff':return ev(n.left,v)===ev(n.right,v);
+    case'the':return!ev(n.left,v)||ev(n.right,v);
+  }
+  return false;
+}
+
+function cvars(n,s){
+  if(!s)s=new Set();if(!n)return s;
+  if(n.type==='var')s.add(n.name);
+  else{cvars(n.left,s);cvars(n.right,s);cvars(n.value,s);}
+  return s;
+}
+
+function dep(n){
+  if(!n||n.type==='var')return 0;
+  if(n.type==='not')return 1+dep(n.value);
+  return 1+Math.max(dep(n.left)||0,dep(n.right)||0);
+}
+
+function allSubs(n,l,se){
+  if(!l)l=[];if(!se)se=new Set();if(!n)return l;
+  var s=ps(n);if(!se.has(s)){se.add(s);l.push(n);}
+  if(n.left)allSubs(n.left,l,se);if(n.right)allSubs(n.right,l,se);if(n.value)allSubs(n.value,l,se);
+  return l;
+}
+
+function allVarsFrom(roots){
+  var s=new Set();(roots||[]).forEach(function(r){cvars(r,s);});return Array.from(s).sort();
+}
+
+function allAssigns(vars){
+  var tot=Math.pow(2,vars.length),rows=[];
+  for(var i=0;i<tot;i++){
+    var v={};vars.forEach(function(vr,j){v[vr]=Boolean((i>>j)&1);});rows.push(v);
+  }
+  return rows;
+}
+
+function cellD(val,cls){
+  var c=val?'vD':'vY',t=val?'D':'Y';
+  return'<td'+(cls?' class="'+cls+'"':'')+'><span class="'+c+'">'+t+'</span></td>';
+}
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+
+var props=[],activeId=null,dragging=null,nextN=1;
+
+function addProp(){var id='p'+Date.now();props.push({id:id,name:'O'+nextN++,root:null});activeId=id;renderAll();}
+function removeProp(id){
+  props=props.filter(function(p){return p.id!==id;});
+  if(activeId===id)activeId=props.length?props[props.length-1].id:null;
+  document.getElementById('ana-res').innerHTML='';
+  renderAll();
+}
+window.selProp=function(id){activeId=id;renderAll();};
+function getAP(){return props.find(function(p){return p.id===activeId;});}
+function cpList(){return props.filter(function(p){return p.root&&isOk(p.root);});}
+
+function setAt(pid,path,val){
+  var prop=props.find(function(p){return p.id===pid;});if(!prop)return;
+  if(path==='root'){prop.root=val;return;}
+  var parts=path.split('.'),n=prop.root;
+  for(var i=1;i<parts.length-1;i++){if(!n)return;n=n[parts[i]];}
+  if(n)n[parts[parts.length-1]]=val;
+}
+
+function mkNode(type,name){
+  if(type==='var')return{type:'var',name:name};
+  if(type==='not')return{type:'not',value:null};
+  return{type:type,left:null,right:null};
+}
+
+window.delNode=function(pid,path){
+  setAt(pid,path,null);
+  document.getElementById('ana-res').innerHTML='';
+  renderAll();
+};
+window.clearAT=function(){
+  var p=getAP();if(p){p.root=null;document.getElementById('ana-res').innerHTML='';renderAll();}
+};
+
+// ═══════════════════════════════════════════════
+// ∴ root-only guard
+// ═══════════════════════════════════════════════
+
+// Returns true if dropping is allowed
+function canDrop(type, slotPath){
+  // ∴ can only go into the root slot
+  if(type==='the' && slotPath!=='root') return false;
+  // Also: if root already exists and type is 'the', user must clear first
+  // (handled naturally since root slot only shows when root is null)
+  return true;
+}
+
+// Update ∴ token availability based on active prop's root
+function updateTheTok(){
+  var tok=document.getElementById('tok-the');
+  var prop=getAP();
+  // disable if active prop already has a root (root slot is not visible)
+  var rootOccupied=prop&&prop.root!==null;
+  tok.classList.toggle('disabled', !!rootOccupied);
+}
+
+// ═══════════════════════════════════════════════
+// RENDER — TREE NODES
+// ═══════════════════════════════════════════════
+
+function rSlot(pid,path){
+  return'<span class="slot" data-pid="'+pid+'" data-path="'+path+'">&#8853;</span>';
+}
+
+function rNode(pid,n,path){
+  if(n===null)return rSlot(pid,path);
+  var d='<button class="dl" onclick="delNode(\''+pid+'\',\''+path+'\')" title="Sil">&#215;</button>';
+  if(n.type==='var')
+    return'<span class="nv"><span>'+n.name+'</span>'+d+'</span>';
+  if(n.type==='not')
+    return'<span class="nu"><span class="ops u">&#172;</span>'+rNode(pid,n.value,path+'.value')+d+'</span>';
+  var S={and:'&#8743;',or:'&#8744;',imp:'&#8594;',iff:'&#8596;',the:'&#8756;'};
+  var isThe=n.type==='the';
+  var cls='nb'+(isThe?' nt':'');
+  var ocls='ops '+(isThe?'t':'b');
+  return'<span class="'+cls+'">'+rNode(pid,n.left,path+'.left')
+    +'<span class="'+ocls+'">'+S[n.type]+'</span>'
+    +rNode(pid,n.right,path+'.right')+d+'</span>';
+}
+
+// ═══════════════════════════════════════════════
+// RENDER — PROP LIST & EDITOR
+// ═══════════════════════════════════════════════
+
+function renderPL(){
+  var h='';
+  if(!props.length)h='<span class="pe">Henuz önerme yok.</span>';
+  props.forEach(function(p){
+    var ok2=p.root&&isOk(p.root),act=p.id===activeId;
+    h+='<div class="pc'+(act?' active':'')+(ok2&&act?' ok':'')+'" onclick="selProp(\''+p.id+'\')">'
+      +'<div class="pct"><span class="pcn">'+p.name+'</span>'
+      +(ok2?'<span class="pcok">&#10003;</span>':'')
+      +'<button class="pcd" onclick="event.stopPropagation();removeProp(\''+p.id+'\')" title="Sil">&#215;</button></div>'
+      +'<div class="pcf">'+(p.root?ps(p.root):'<em style="opacity:.4">boş</em>')+'</div></div>';
+  });
+  h+='<button class="pc pc-add" onclick="addProp()"><span style="font-size:1.1rem">+</span><span>Yeni</span></button>';
+  document.getElementById('plist').innerHTML=h;
+}
+
+function renderED(){
+  var sec=document.getElementById('sec-ed'),prop=getAP();
+  if(!prop){sec.style.display='none';return;}
+  sec.style.display='';
+  document.getElementById('ed-lbl').textContent=prop.name;
+  var tw=document.getElementById('tw'),fbar=document.getElementById('fbar');
+  if(!prop.root){
+    tw.innerHTML=rSlot(prop.id,'root');
+    fbar.innerHTML='<span class="ph">Paletten bir blok sürükleyip &#8853; yuvasına bırakın...</span>';
+    return;
+  }
+  tw.innerHTML=rNode(prop.id,prop.root,'root');
+  if(isOk(prop.root))fbar.textContent=ps(prop.root);
+  else fbar.innerHTML='<span style="color:var(--text)">'+ps(prop.root)+'</span><span class="wn"> — tüm &#8853; yuvalarını doldurun</span>';
+}
+
+// ═══════════════════════════════════════════════
+// RENDER — ANALYSIS SELECTOR
+// ═══════════════════════════════════════════════
+
+function renderAnaSel(){
+  var cp=cpList(),el=document.getElementById('ana-sw');
+  if(!cp.length){el.innerHTML='<div class="hint">Bir önermeyi tamamlayın.</div>';return;}
+
+  // preserve checked state
+  var checked=[];
+  document.querySelectorAll('.achk:checked').forEach(function(e){checked.push(e.value);});
+
+  var items=cp.map(function(p){
+    var chk=checked.indexOf(p.id)>-1?' checked':'';
+    var isThe=p.root&&p.root.type==='the';
+    return'<label class="chk-row"><input type="checkbox" class="achk" value="'+p.id+'"'+chk+'>'
+      +'<span class="nb2">'+p.name+'</span>'
+      +'<span class="fml">'+ps(p.root)+(isThe?' <span style="color:var(--pur);font-size:.64rem">[cikarim]</span>':'')+'</span>'
+      +'</label>';
+  }).join('');
+
+  el.innerHTML='<div class="lbl" style="margin-bottom:.42rem">Denetlenecek Önermeler</div>'
+    +items
+    +'<div style="margin-top:.65rem"><button class="btn" onclick="runAna()">Denetle</button></div>';
+}
+
+function renderAll(){renderPL();renderED();renderAnaSel();updateTheTok();}
+
+// ═══════════════════════════════════════════════
+// RUN — COMBINED ANALYSIS
+// ═══════════════════════════════════════════════
+
+window.runAna=function(){
+  var ids=[];
+  document.querySelectorAll('.achk:checked').forEach(function(e){ids.push(e.value);});
+  var res=document.getElementById('ana-res');
+  if(!ids.length){res.innerHTML='<div class="err">En az bir önerme secin.</div>';return;}
+
+  var selProps=ids.map(function(id){return props.find(function(p){return p.id===id;});});
+
+  try{
+    var vars=allVarsFrom(selProps.map(function(p){return p.root;}));
+    if(vars.length>14)throw new Error('Çok fazla değişken. Maks 14.');
+    var assigns=allAssigns(vars);
+
+    // For each prop: collect sub-expressions (excluding bare variables)
+    var vs0=new Set(vars);
+    var groups=selProps.map(function(p){
+      var sb=allSubs(p.root).sort(function(a,b){
+        var d=dep(a)-dep(b);return d||ps(a).localeCompare(ps(b));
+      });
+      var subCols=sb.map(ps).filter(function(c){return!vs0.has(c);});
+      var mainCol=ps(p.root);
+      return{prop:p,sb:sb,subCols:subCols,mainCol:mainCol};
+    });
+
+    // Build all row data
+    var rows=assigns.map(function(vals){
+      var row={};
+      vars.forEach(function(v){row[v]=vals[v];});
+      groups.forEach(function(g){
+        g.sb.forEach(function(e){row[ps(e)]=ev(e,vals);});
+      });
+      return row;
+    });
+
+    // ── Single-row coloring: based on first prop (for clarity) ──
+    // We do per-prop result cards instead
+
+    // ── Build combined table ──
+    var h='<div class="fi">';
+
+    // Legend
+    h+='<div class="legend"><span class="li"><span class="ls ls-t"></span>D alan satirlar</span>'
+      +'<span class="li"><span class="ls ls-f"></span>Y alan satırlar</span></div>';
+
+    // Table — for single prop: color rows by its main column
+    // For multi-prop: no row coloring (too ambiguous), color by main cols of each prop
+    var singleProp=groups.length===1;
+
+    h+='<div class="tblw"><table class="tt"><thead><tr>';
+    // var headers
+    vars.forEach(function(v){h+='<th>'+v+'</th>';});
+    // per-prop headers
+    groups.forEach(function(g,gi){
+      g.subCols.forEach(function(c,ci){
+        var isSep=(gi===0&&ci===0)?true:(ci===0&&gi>0);
+        h+='<th'+(isSep?' class="sp"':'')+'>'+c+'</th>';
+      });
+      // main column gets special header
+      var mainIsSep=(g.subCols.length===0&&gi>0)||(g.subCols.length===0&&gi===0);
+      var cls=(mainIsSep?'sp ':'')+'main-h';
+      // first group: if no subCols, main-h also gets sp if gi>0
+      // simplify:
+      var sp2=(gi>0&&g.subCols.length===0)?'sp ':'';
+      h+='<th class="'+sp2+'main-h">'+g.prop.name+': '+g.mainCol+'</th>';
+    });
+    h+='</tr></thead><tbody>';
+
+    rows.forEach(function(row){
+      var rc='';
+      if(singleProp){rc=row[groups[0].mainCol]?'rt':'rf';}
+      h+='<tr'+(rc?' class="'+rc+'"':'')+'>';
+      vars.forEach(function(v){h+=cellD(row[v],'');});
+      groups.forEach(function(g,gi){
+        g.subCols.forEach(function(c,ci){
+          var sp=(gi===0&&ci===0)||ci===0;
+          h+=cellD(row[c],sp?'sp':'');
+        });
+        var mainSp=(g.subCols.length===0&&gi>0)?'sp':'';
+        h+=cellD(row[g.mainCol],mainSp);
+      });
+      h+='</tr>';
+    });
+    h+='</tbody></table></div>';
+
+    // ── Result cards for each prop ──
+    h+='<div class="rcards">';
+
+    groups.forEach(function(g){
+      var mainVals=rows.map(function(r){return r[g.mainCol];});
+      var allD=mainVals.every(Boolean);
+      var anyD=mainVals.some(Boolean);
+      var trueCount=mainVals.filter(Boolean).length;
+      var falseCount=mainVals.length-trueCount;
+
+      var status=allD?'tot':anyD?'olu':'cel';
+      var statusLbl={tot:'Totoloji',olu:'Olumsal',cel:'Çelişki'};
+      var statusCls={tot:'b-tot',olu:'b-olu',cel:'b-cel'};
+      var tutarli=anyD,gecerli=allD;
+      var isThe=g.prop.root.type==='the';
+
+      h+='<div class="rcard">';
+      h+='<div class="rcard-head">'+g.prop.name;
+      h+='<span class="badge '+statusCls[status]+'">'+statusLbl[status]+'</span>';
+      if(tutarli) h+='<span class="badge b-ok">Tutarlı</span>';
+      else        h+='<span class="badge b-no">Tutarsız</span>';
+      if(gecerli) h+='<span class="badge b-ok">Geçerli</span>';
+      else        h+='<span class="badge b-no">Geçersiz</span>';
+      h+='</div>';
+      h+='<div class="rcard-fml">'+ps(g.prop.root)+'</div>';
+
+      // explanation
+      if(isThe){
+        // argument
+        if(gecerli){
+          h+='<div class="rn">Çıkarım önermesi tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> değerini almaktadır. Çıkarım <strong>tutarlı ve geçerlidir</strong>.</div>';
+        } else {
+          h+='<div class="rn">Çıkarım önermesi <strong>'+falseCount+'</strong> satirda <span class="vY">Y</span> değerini almaktadır. Çıkarım <strong>geçersizdir</strong>'+(tutarli?', ancak tutarlıdır':'</div>');
+          if(tutarli) h+='.</div>';
+        }
+      } else {
+        if(allD){
+          h+='<div class="rn">Tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — hem tutarlı hem geçerlidir.</div>';
+        } else if(anyD){
+          h+='<div class="rn"><strong>'+trueCount+'</strong> satırda <span class="vD">D</span>, <strong>'+falseCount+'</strong> satırda <span class="vY">Y</span> — tutarlı ancak geçerli degildir.</div>';
+        } else {
+          h+='<div class="rn">Hiçbir satırda <span class="vD">D</span> değeri alınmamaktadır — tutarsız ve geçersizdir.</div>';
+        }
+      }
+      h+='</div>'; // rcard
+    });
+
+    // ── Equivalence between each pair ──
+    if(groups.length>=2){
+      h+='<div style="margin-top:.25rem;font-family:var(--mono);font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:.55rem">Eşdeğerlik Denetlemeleri</div>';
+      for(var i=0;i<groups.length;i++){
+        for(var j=i+1;j<groups.length;j++){
+          var g1=groups[i],g2=groups[j];
+          var equiv=rows.every(function(r){return r[g1.mainCol]===r[g2.mainCol];});
+          var diffCount=rows.filter(function(r){return r[g1.mainCol]!==r[g2.mainCol];}).length;
+          h+='<div class="eq-card">';
+          h+='<div class="eq-head"><span>'+g1.prop.name+'</span><span class="eq-sym">'+(equiv?'&#8801;':'&#8802;')+'</span><span>'+g2.prop.name+'</span>';
+          if(equiv) h+='<span class="badge b-ok">Eşdeğer</span>';
+          else      h+='<span class="badge b-no">Eşdeğer Değil</span>';
+          h+='</div>';
+          if(equiv){
+            h+='<div class="rn">Her satırda aynı doğruluk değeri alınmaktadır — önermeler birbirine eşdeğerdir.</div>';
+          } else {
+            h+='<div class="rn"><strong>'+diffCount+'</strong> satırda farklı değer alınmaktadır — önermeler eşdeğer değildir.</div>';
+          }
+          h+='</div>';
+        }
+      }
+    }
+
+    h+='</div>'; // rcards
+    h+='</div>'; // fi
+    res.innerHTML=h;
+  }catch(e){res.innerHTML='<div class="err">'+e.message+'</div>';}
+};
+
+// ═══════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════
+
+document.addEventListener('dragover',function(e){
+  var s=e.target.closest('.slot');if(s&&dragging){e.preventDefault();s.classList.add('over');}
+});
+document.addEventListener('dragleave',function(e){
+  var s=e.target.closest('.slot');if(s&&!s.contains(e.relatedTarget))s.classList.remove('over');
+});
+document.addEventListener('drop',function(e){
+  var s=e.target.closest('.slot');
+  if(s&&dragging){
+    e.preventDefault();s.classList.remove('over');
+    var path=s.dataset.path;
+    if(!canDrop(dragging.type,path)){
+      // flash slot red briefly
+      s.style.borderColor='var(--accent)';setTimeout(function(){s.style.borderColor='';},600);
+      dragging=null;return;
+    }
+    setAt(s.dataset.pid,path,mkNode(dragging.type,dragging.name));
+    dragging=null;
+    document.getElementById('ana-res').innerHTML='';
+    renderAll();
+  }
+});
+
+function attachDrag(el){
+  el.addEventListener('dragstart',function(){
+    if(el.classList.contains('disabled'))return;
+    dragging={type:el.dataset.type,name:el.dataset.name||undefined};
+    el.classList.add('dragging');
+  });
+  el.addEventListener('dragend',function(){dragging=null;el.classList.remove('dragging');});
+}
+
+// ═══════════════════════════════════════════════
+// PALETTE INIT
+// ═══════════════════════════════════════════════
+
+function addVT(name){
+  var c=document.getElementById('vt'),ex=c.querySelectorAll('.tok');
+  for(var i=0;i<ex.length;i++)if(ex[i].dataset.name===name)return;
+  var el=document.createElement('div');
+  el.className='tok tv';el.draggable=true;el.dataset.type='var';el.dataset.name=name;el.textContent=name;
+  attachDrag(el);c.appendChild(el);
+}
+['A','B','C','P','Q','R','S'].forEach(addVT);
+document.querySelectorAll('.tok[data-type]').forEach(attachDrag);
+document.getElementById('cvar').addEventListener('keydown',function(e){
+  if(e.key==='Enter'){var v=e.target.value.trim().toUpperCase();if(v&&/^[A-Z][A-Z0-9_]*$/.test(v)){addVT(v);e.target.value='';}}
+});
+
+renderAll();
+</script>
+</body>
+</html>

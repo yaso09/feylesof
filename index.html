@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feylesof · Mantık Analiz Aracı</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #fafaf8; --text: #1a1814; --text2: #6c6760; --text3: #9a9490;
+  --accent: #7a1f1f; --border: #d4cfc7; --bg2: #f0ede6;
+  --serif: 'EB Garamond', Georgia, serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+body {
+  font-family: var(--serif);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1.72;
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4.5rem 2rem 5rem;
+}
+
+/* ── TITLE ── */
+.title-block {
+  border-bottom: 2.5px solid var(--text);
+  padding-bottom: 1.6rem;
+  margin-bottom: 2.8rem;
+}
+.title-block h1 {
+  font-size: 2.1rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.1px;
+}
+.title-block h1 strong {
+  font-weight: 600;
+}
+.title-block .sub {
+  font-family: var(--mono);
+  font-size: .65rem;
+  color: var(--text3);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-top: .6rem;
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+.title-block .sub a {
+  color: var(--text3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+  transition: color .15s;
+}
+.title-block .sub a:hover { color: var(--text); }
+.sep { color: var(--border); }
+
+/* ── PROSE ── */
+.prose h1 { display: none; }
+.prose h2 {
+  font-size: 1.55rem;
+  font-weight: 500;
+  margin: 2.5rem 0 .6rem;
+  padding-top: 2.2rem;
+  border-top: 1px solid var(--border);
+  line-height: 1.28;
+}
+.prose h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.prose h3 {
+  font-size: 1.14rem;
+  font-weight: 500;
+  margin: 1.7rem 0 .4rem;
+}
+.prose h4 {
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text2);
+  margin: 1.4rem 0 .3rem;
+}
+.prose p { margin-bottom: .9rem; }
+.prose p:last-child { margin-bottom: 0; }
+.prose a { color: var(--text); border-bottom: 1px solid var(--border); text-decoration: none; transition: border-color .15s; }
+.prose a:hover { border-bottom-color: var(--text); }
+.prose strong { font-weight: 600; }
+.prose em { font-style: italic; }
+.prose code {
+  font-family: var(--mono);
+  font-size: .82em;
+  background: var(--bg2);
+  padding: .06em .36em;
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+.prose pre {
+  background: var(--text);
+  color: #d4cfc7;
+  padding: 1rem 1.3rem;
+  overflow-x: auto;
+  margin: 1.1rem 0;
+  border-left: 3px solid var(--accent);
+}
+.prose pre code { background: none; border: none; padding: 0; color: inherit; font-size: .83rem; line-height: 1.6; }
+.prose blockquote {
+  border-left: 2.5px solid var(--border);
+  padding: .35rem 0 .35rem 1.1rem;
+  margin: 1rem 0;
+  color: var(--text2);
+  font-style: italic;
+}
+.prose ul, .prose ol { padding-left: 1.45rem; margin-bottom: .9rem; }
+.prose li { margin-bottom: .28rem; line-height: 1.6; }
+.prose li::marker { color: var(--text3); }
+.prose table { border-collapse: collapse; width: 100%; margin: 1.1rem 0; font-size: .93rem; }
+.prose table th { border-bottom: 2px solid var(--text); padding: .3rem .65rem; text-align: left; font-weight: 600; background: var(--bg2); font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .6px; }
+.prose table td { border-bottom: 1px solid var(--border); padding: .28rem .65rem; vertical-align: top; }
+.prose hr { border: none; border-top: 1px solid var(--border); margin: 1.8rem 0; }
+.prose img { max-width: 100%; border: 1px solid var(--border); display: block; margin: 1rem 0; }
+
+/* ── FOOTER ── */
+.footer {
+  margin-top: 3.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: .63rem;
+  color: var(--text3);
+  letter-spacing: .7px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.footer a { color: var(--text3); text-decoration: none; border-bottom: 1px solid var(--border); transition: color .15s; }
+.footer a:hover { color: var(--text); }
+
+/* ── LOADING / ERR ── */
+.loading {
+  font-family: var(--mono);
+  font-size: .76rem;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+.loading::before {
+  content: '';
+  width: .52rem; height: .52rem;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--text);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-err {
+  font-family: var(--mono);
+  font-size: .75rem;
+  color: var(--accent);
+  padding: .8rem;
+  background: #fff8f8;
+  border: 1px solid #c4a0a0;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="title-block">
+    <h1>Feylesof <strong style="color: #7a1f1f"><i>Mantık</i></strong> Analiz Aracı</h1>
+    <div class="sub">
+      <span>Geliştirici: Yasir Eymen Kayabaşı</span>
+      <span class="sep">·</span>
+      <a href="./onerme-olusturucu.html">Araca Git →</a>
+    </div>
+  </div>
+
+  <div class="prose" id="prose">
+    <div class="loading">README.md okunuyor…</div>
+  </div>
+
+  <div class="footer">
+    <span>Yasir Eymen Kayabaşı</span>
+    <a href="./onerme-olusturucu.html">onerme-olusturucu.html →</a>
+  </div>
+
+</div>
+
+<script>
+marked.setOptions({ breaks: false, gfm: true });
+fetch('./README.md')
+  .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+  .then(function(md){
+    document.getElementById('prose').innerHTML = marked.parse(md);
+    console.log(marked.parse(md));
+  })
+  .catch(function(e){
+    document.getElementById('prose').innerHTML =
+      '<div class="load-err">README.md yüklenemedi: '+e.message+'</div>';
+  });
+</script>
+</body>
+</html>
