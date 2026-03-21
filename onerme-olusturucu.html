@@ -111,14 +111,12 @@ table.tt tr.rf td{background:#fef0ee}
 .rcard{border:1.5px solid var(--border);background:#fff;padding:.7rem .9rem}
 .rcard-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.45rem;font-family:var(--mono);font-size:.78rem;font-weight:600}
 .rcard-fml{font-family:var(--mono);font-size:.71rem;color:var(--text2);margin-bottom:.5rem;padding:.3rem .6rem;background:var(--bg2);border-left:2px solid var(--border)}
-.badges{display:flex;flex-wrap:wrap;gap:.38rem;margin-bottom:.3rem}
 .badge{display:inline-block;padding:.12rem .62rem;font-family:var(--mono);font-size:.67rem;border:1px solid}
 .b-tot{color:var(--green);border-color:var(--green);background:#e8f7ed}
 .b-cel{color:var(--accent);border-color:var(--accent);background:#fff0ed}
 .b-olu{color:var(--blue);border-color:var(--blue);background:#eef4ff}
 .b-ok{color:var(--green);border-color:var(--green);background:#e8f7ed}
 .b-no{color:var(--accent);border-color:var(--accent);background:#fff0ed}
-.b-eq{color:var(--pur);border-color:var(--pur-bd);background:var(--pur-bg)}
 .rn{font-family:var(--mono);font-size:.72rem;color:var(--text2);line-height:1.7}
 .eq-card{border:1.5px solid var(--border);background:#fff;padding:.65rem .9rem}
 .eq-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.35rem;font-family:var(--mono);font-size:.77rem;font-weight:600}
@@ -129,9 +127,48 @@ table.tt tr.rf td{background:#fef0ee}
 .li{display:flex;align-items:center;gap:.3rem}
 .ls{width:1rem;height:.68rem;border:1px solid rgba(0,0,0,.1)}
 .ls-t{background:#edf7f0}.ls-f{background:#fef0ee}
-
-/* ── THE NOTE ── */
 .the-note{font-family:var(--mono);font-size:.68rem;color:var(--pur);padding:.3rem .6rem;background:var(--pur-bg);border:1px solid var(--pur-bd);margin-top:.5rem}
+.res-banner{display:flex;align-items:center;gap:.6rem;padding:.55rem .9rem;margin-bottom:.65rem;font-family:var(--mono);font-size:.78rem;font-weight:600;border-width:1.5px;border-style:solid}
+.banner-ok{background:#e8f7ed;border-color:#8cbfa0;color:var(--green)}
+.banner-fail{background:#fff0ed;border-color:#c4a0a0;color:var(--accent)}
+
+/* ── TABLEAU ── */
+.chi-sep{border-top:1.5px dashed var(--border);margin:1.6rem 0 1.2rem}
+.tab-info{font-family:var(--mono);font-size:.67rem;color:var(--text2);padding:.38rem .68rem;background:var(--bg2);border:1px solid var(--border);margin-bottom:.85rem;line-height:1.7}
+.tab-wrap{overflow-x:auto;margin-top:.6rem;padding:1.2rem 1.5rem;background:#fff;border:1.5px solid var(--border);display:inline-block;min-width:0}
+
+/* tree nodes */
+.t-tree{display:flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:.81rem}
+.t-rows{display:flex;flex-direction:column;align-items:flex-start}
+.t-row{display:flex;align-items:baseline;gap:.4rem;padding:.2rem .3rem;line-height:1.58;white-space:nowrap}
+.t-rn{color:var(--text2);font-size:.62rem;min-width:1.5rem;text-align:right;flex-shrink:0;user-select:none}
+.t-fm{color:var(--text)}
+.t-ck{color:var(--green);font-size:.7rem;margin-left:.1rem}
+.t-ref{color:var(--text3);font-size:.59rem;margin-left:.12rem}
+
+/* vertical connector trunk → fork */
+.t-vline{width:1.5px;background:var(--border);height:1.5rem;flex-shrink:0}
+
+/* horizontal fork bar + two branches */
+.t-split{display:flex;align-items:flex-start;border-top:1.5px solid var(--border)}
+.t-bl,.t-br{display:flex;flex-direction:column;align-items:center;padding:.55rem .9rem 0;min-width:5.5rem}
+.t-br{border-left:1.5px solid var(--border)}
+
+/* terminals */
+.t-closed{
+  color:var(--accent);font-family:var(--mono);font-size:.9rem;font-weight:700;
+  padding:.38rem .4rem;text-align:center;letter-spacing:.3px;
+  border-top:1.5px solid var(--red-bd);margin-top:.1rem;width:100%;
+}
+.t-open{
+  color:var(--green);font-family:var(--mono);font-size:1.15rem;
+  padding:.28rem .4rem;text-align:center;
+  border-top:1.5px solid var(--grn-bd);margin-top:.1rem;width:100%;
+}
+
+/* open model */
+.tab-open-model{font-family:var(--mono);font-size:.67rem;color:var(--green);padding:.28rem .55rem;background:#e8f7ed;border:1px solid var(--grn-bd);margin-top:.45rem;display:inline-flex;flex-wrap:wrap;gap:.4rem}
+.tab-model-var{display:flex;gap:.15rem;align-items:center}
 
 @keyframes fup{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .fi{animation:fup .22s ease both}
@@ -139,8 +176,8 @@ table.tt tr.rf td{background:#fef0ee}
 </head>
 <body>
 <header>
-  <h1><div style="cursor: pointer" onclick="window.location.href = '/'">Feylesof</div>
-    <span>Önerme Oluşturucu · Tutarlılık · Geçerlilik · Eşdeğerlik</span>
+  <h1><div style="cursor:pointer" onclick="window.location.href='/'">Feylesof</div>
+    <span>Önerme Oluşturucu · Tutarlılık · Geçerlilik · Eşdeğerlik · Çözümleyici Çizelge</span>
   </h1>
 </header>
 
@@ -155,7 +192,7 @@ table.tt tr.rf td{background:#fef0ee}
     <div class="pg">
       <div class="pgl">Tekli</div>
       <div class="toks">
-        <div class="tok tu" draggable="true" data-type="not">&#172; DEĞIL</div>
+        <div class="tok tu" draggable="true" data-type="not">&#172; DEĞİL</div>
       </div>
     </div>
     <div class="pg">
@@ -200,6 +237,12 @@ table.tt tr.rf td{background:#fef0ee}
       <div class="sech"><span class="secl">Analiz</span></div>
       <div id="ana-sw"></div>
       <div id="ana-res"></div>
+      <!-- TABLEAU SECTION -->
+      <div id="chi-sec" style="display:none">
+        <div class="chi-sep"></div>
+        <div class="sech"><span class="secl">Çözümleyici Çizelge</span></div>
+        <div id="chi-res"></div>
+      </div>
     </section>
 
   </main>
@@ -219,7 +262,7 @@ function ps(n){
     case'or': return'('+ps(n.left)+'\u2228'+ps(n.right)+')';
     case'imp':return'('+ps(n.left)+'\u2192'+ps(n.right)+')';
     case'iff':return'('+ps(n.left)+'\u2194'+ps(n.right)+')';
-    case'the':return ps(n.left)+' \u2234 '+ps(n.right); // no outer parens for ∴
+    case'the':return ps(n.left)+' \u2234 '+ps(n.right);
     default:return'?';
   }
 }
@@ -231,7 +274,6 @@ function isOk(n){
   return isOk(n.left)&&isOk(n.right);
 }
 
-// ∴ evaluates as → (material implication)
 function ev(n,v){
   switch(n.type){
     case'var':return!!v[n.name];
@@ -292,12 +334,16 @@ function addProp(){var id='p'+Date.now();props.push({id:id,name:'O'+nextN++,root
 function removeProp(id){
   props=props.filter(function(p){return p.id!==id;});
   if(activeId===id)activeId=props.length?props[props.length-1].id:null;
-  document.getElementById('ana-res').innerHTML='';
-  renderAll();
+  clrAna();renderAll();
 }
 window.selProp=function(id){activeId=id;renderAll();};
 function getAP(){return props.find(function(p){return p.id===activeId;});}
 function cpList(){return props.filter(function(p){return p.root&&isOk(p.root);});}
+function clrAna(){
+  document.getElementById('ana-res').innerHTML='';
+  document.getElementById('chi-res').innerHTML='';
+  document.getElementById('chi-sec').style.display='none';
+}
 
 function setAt(pid,path,val){
   var prop=props.find(function(p){return p.id===pid;});if(!prop)return;
@@ -306,65 +352,38 @@ function setAt(pid,path,val){
   for(var i=1;i<parts.length-1;i++){if(!n)return;n=n[parts[i]];}
   if(n)n[parts[parts.length-1]]=val;
 }
-
 function mkNode(type,name){
   if(type==='var')return{type:'var',name:name};
   if(type==='not')return{type:'not',value:null};
   return{type:type,left:null,right:null};
 }
+window.delNode=function(pid,path){setAt(pid,path,null);clrAna();renderAll();};
+window.clearAT=function(){var p=getAP();if(p){p.root=null;clrAna();renderAll();}};
 
-window.delNode=function(pid,path){
-  setAt(pid,path,null);
-  document.getElementById('ana-res').innerHTML='';
-  renderAll();
-};
-window.clearAT=function(){
-  var p=getAP();if(p){p.root=null;document.getElementById('ana-res').innerHTML='';renderAll();}
-};
-
-// ═══════════════════════════════════════════════
-// ∴ root-only guard
-// ═══════════════════════════════════════════════
-
-// Returns true if dropping is allowed
-function canDrop(type, slotPath){
-  // ∴ can only go into the root slot
-  if(type==='the' && slotPath!=='root') return false;
-  // Also: if root already exists and type is 'the', user must clear first
-  // (handled naturally since root slot only shows when root is null)
+function canDrop(type,slotPath){
+  if(type==='the'&&slotPath!=='root')return false;
   return true;
 }
-
-// Update ∴ token availability based on active prop's root
 function updateTheTok(){
-  var tok=document.getElementById('tok-the');
-  var prop=getAP();
-  // disable if active prop already has a root (root slot is not visible)
-  var rootOccupied=prop&&prop.root!==null;
-  tok.classList.toggle('disabled', !!rootOccupied);
+  var tok=document.getElementById('tok-the'),prop=getAP();
+  tok.classList.toggle('disabled',!!(prop&&prop.root!==null));
 }
 
 // ═══════════════════════════════════════════════
-// RENDER — TREE NODES
+// RENDER — TREE
 // ═══════════════════════════════════════════════
 
-function rSlot(pid,path){
-  return'<span class="slot" data-pid="'+pid+'" data-path="'+path+'">&#8853;</span>';
-}
+function rSlot(pid,path){return'<span class="slot" data-pid="'+pid+'" data-path="'+path+'">&#8853;</span>';}
 
 function rNode(pid,n,path){
   if(n===null)return rSlot(pid,path);
   var d='<button class="dl" onclick="delNode(\''+pid+'\',\''+path+'\')" title="Sil">&#215;</button>';
-  if(n.type==='var')
-    return'<span class="nv"><span>'+n.name+'</span>'+d+'</span>';
-  if(n.type==='not')
-    return'<span class="nu"><span class="ops u">&#172;</span>'+rNode(pid,n.value,path+'.value')+d+'</span>';
+  if(n.type==='var')return'<span class="nv"><span>'+n.name+'</span>'+d+'</span>';
+  if(n.type==='not')return'<span class="nu"><span class="ops u">&#172;</span>'+rNode(pid,n.value,path+'.value')+d+'</span>';
   var S={and:'&#8743;',or:'&#8744;',imp:'&#8594;',iff:'&#8596;',the:'&#8756;'};
   var isThe=n.type==='the';
-  var cls='nb'+(isThe?' nt':'');
-  var ocls='ops '+(isThe?'t':'b');
-  return'<span class="'+cls+'">'+rNode(pid,n.left,path+'.left')
-    +'<span class="'+ocls+'">'+S[n.type]+'</span>'
+  return'<span class="nb'+(isThe?' nt':'')+'">'+rNode(pid,n.left,path+'.left')
+    +'<span class="ops '+(isThe?'t':'b')+'">'+S[n.type]+'</span>'
     +rNode(pid,n.right,path+'.right')+d+'</span>';
 }
 
@@ -374,7 +393,7 @@ function rNode(pid,n,path){
 
 function renderPL(){
   var h='';
-  if(!props.length)h='<span class="pe">Henuz önerme yok.</span>';
+  if(!props.length)h='<span class="pe">Henüz önerme yok.</span>';
   props.forEach(function(p){
     var ok2=p.root&&isOk(p.root),act=p.id===activeId;
     h+='<div class="pc'+(act?' active':'')+(ok2&&act?' ok':'')+'" onclick="selProp(\''+p.id+'\')">'
@@ -410,189 +429,367 @@ function renderED(){
 function renderAnaSel(){
   var cp=cpList(),el=document.getElementById('ana-sw');
   if(!cp.length){el.innerHTML='<div class="hint">Bir önermeyi tamamlayın.</div>';return;}
-
-  // preserve checked state
   var checked=[];
   document.querySelectorAll('.achk:checked').forEach(function(e){checked.push(e.value);});
-
   var items=cp.map(function(p){
     var chk=checked.indexOf(p.id)>-1?' checked':'';
     var isThe=p.root&&p.root.type==='the';
     return'<label class="chk-row"><input type="checkbox" class="achk" value="'+p.id+'"'+chk+'>'
       +'<span class="nb2">'+p.name+'</span>'
-      +'<span class="fml">'+ps(p.root)+(isThe?' <span style="color:var(--pur);font-size:.64rem">[cikarim]</span>':'')+'</span>'
+      +'<span class="fml">'+ps(p.root)+(isThe?' <span style="color:var(--pur);font-size:.62rem">[çıkarım]</span>':'')+'</span>'
       +'</label>';
   }).join('');
-
   el.innerHTML='<div class="lbl" style="margin-bottom:.42rem">Denetlenecek Önermeler</div>'
     +items
-    +'<div style="margin-top:.65rem"><button class="btn" onclick="runAna()">Denetle</button></div>';
+    +'<div style="margin-top:.65rem;display:flex;gap:.45rem;flex-wrap:wrap">'
+    +'<button class="btn" onclick="runAna()">Denetle</button>'
+    +'<button class="btng" onclick="runChizelge()">Çizelge Oluştur</button>'
+    +'</div>';
 }
 
 function renderAll(){renderPL();renderED();renderAnaSel();updateTheTok();}
 
 // ═══════════════════════════════════════════════
-// RUN — COMBINED ANALYSIS
+// RUN — TRUTH TABLE ANALYSIS
 // ═══════════════════════════════════════════════
 
 window.runAna=function(){
   var ids=[];
   document.querySelectorAll('.achk:checked').forEach(function(e){ids.push(e.value);});
   var res=document.getElementById('ana-res');
-  if(!ids.length){res.innerHTML='<div class="err">En az bir önerme secin.</div>';return;}
-
+  if(!ids.length){res.innerHTML='<div class="err">En az bir önerme seçin.</div>';return;}
   var selProps=ids.map(function(id){return props.find(function(p){return p.id===id;});});
-
   try{
     var vars=allVarsFrom(selProps.map(function(p){return p.root;}));
     if(vars.length>14)throw new Error('Çok fazla değişken. Maks 14.');
     var assigns=allAssigns(vars);
-
-    // For each prop: collect sub-expressions (excluding bare variables)
     var vs0=new Set(vars);
     var groups=selProps.map(function(p){
-      var sb=allSubs(p.root).sort(function(a,b){
-        var d=dep(a)-dep(b);return d||ps(a).localeCompare(ps(b));
-      });
+      var sb=allSubs(p.root).sort(function(a,b){var d=dep(a)-dep(b);return d||ps(a).localeCompare(ps(b));});
       var subCols=sb.map(ps).filter(function(c){return!vs0.has(c);});
-      var mainCol=ps(p.root);
-      return{prop:p,sb:sb,subCols:subCols,mainCol:mainCol};
+      return{prop:p,sb:sb,subCols:subCols,mainCol:ps(p.root)};
     });
-
-    // Build all row data
     var rows=assigns.map(function(vals){
-      var row={};
-      vars.forEach(function(v){row[v]=vals[v];});
-      groups.forEach(function(g){
-        g.sb.forEach(function(e){row[ps(e)]=ev(e,vals);});
-      });
+      var row={};vars.forEach(function(v){row[v]=vals[v];});
+      groups.forEach(function(g){g.sb.forEach(function(e){row[ps(e)]=ev(e,vals);});});
       return row;
     });
-
-    // ── Single-row coloring: based on first prop (for clarity) ──
-    // We do per-prop result cards instead
-
-    // ── Build combined table ──
-    var h='<div class="fi">';
-
-    // Legend
-    h+='<div class="legend"><span class="li"><span class="ls ls-t"></span>D alan satirlar</span>'
-      +'<span class="li"><span class="ls ls-f"></span>Y alan satırlar</span></div>';
-
-    // Table — for single prop: color rows by its main column
-    // For multi-prop: no row coloring (too ambiguous), color by main cols of each prop
     var singleProp=groups.length===1;
-
+    var h='<div class="fi"><div class="legend"><span class="li"><span class="ls ls-t"></span>D alan satırlar</span><span class="li"><span class="ls ls-f"></span>Y alan satırlar</span></div>';
     h+='<div class="tblw"><table class="tt"><thead><tr>';
-    // var headers
     vars.forEach(function(v){h+='<th>'+v+'</th>';});
-    // per-prop headers
     groups.forEach(function(g,gi){
-      g.subCols.forEach(function(c,ci){
-        var isSep=(gi===0&&ci===0)?true:(ci===0&&gi>0);
-        h+='<th'+(isSep?' class="sp"':'')+'>'+c+'</th>';
-      });
-      // main column gets special header
-      var mainIsSep=(g.subCols.length===0&&gi>0)||(g.subCols.length===0&&gi===0);
-      var cls=(mainIsSep?'sp ':'')+'main-h';
-      // first group: if no subCols, main-h also gets sp if gi>0
-      // simplify:
-      var sp2=(gi>0&&g.subCols.length===0)?'sp ':'';
-      h+='<th class="'+sp2+'main-h">'+g.prop.name+': '+g.mainCol+'</th>';
+      g.subCols.forEach(function(c,ci){h+='<th'+(ci===0?' class="sp"':'')+'>'+c+'</th>';});
+      h+='<th class="'+(g.subCols.length===0&&gi>0?'sp ':'')+'main-h">'+g.prop.name+': '+g.mainCol+'</th>';
     });
     h+='</tr></thead><tbody>';
-
     rows.forEach(function(row){
-      var rc='';
-      if(singleProp){rc=row[groups[0].mainCol]?'rt':'rf';}
+      var rc=singleProp?(row[groups[0].mainCol]?'rt':'rf'):'';
       h+='<tr'+(rc?' class="'+rc+'"':'')+'>';
       vars.forEach(function(v){h+=cellD(row[v],'');});
       groups.forEach(function(g,gi){
-        g.subCols.forEach(function(c,ci){
-          var sp=(gi===0&&ci===0)||ci===0;
-          h+=cellD(row[c],sp?'sp':'');
-        });
-        var mainSp=(g.subCols.length===0&&gi>0)?'sp':'';
-        h+=cellD(row[g.mainCol],mainSp);
+        g.subCols.forEach(function(c,ci){h+=cellD(row[c],ci===0?'sp':'');});
+        h+=cellD(row[g.mainCol],(g.subCols.length===0&&gi>0)?'sp':'');
       });
       h+='</tr>';
     });
-    h+='</tbody></table></div>';
-
-    // ── Result cards for each prop ──
-    h+='<div class="rcards">';
-
+    h+='</tbody></table></div><div class="rcards">';
     groups.forEach(function(g){
       var mainVals=rows.map(function(r){return r[g.mainCol];});
-      var allD=mainVals.every(Boolean);
-      var anyD=mainVals.some(Boolean);
-      var trueCount=mainVals.filter(Boolean).length;
-      var falseCount=mainVals.length-trueCount;
-
-      var status=allD?'tot':anyD?'olu':'cel';
-      var statusLbl={tot:'Totoloji',olu:'Olumsal',cel:'Çelişki'};
-      var statusCls={tot:'b-tot',olu:'b-olu',cel:'b-cel'};
-      var tutarli=anyD,gecerli=allD;
+      var allD=mainVals.every(Boolean),anyD=mainVals.some(Boolean);
+      var tc=mainVals.filter(Boolean).length,fc=mainVals.length-tc;
+      var st=allD?'tot':anyD?'olu':'cel';
+      var slbl={tot:'Totoloji',olu:'Olumsal',cel:'Çelişki'};
+      var scls={tot:'b-tot',olu:'b-olu',cel:'b-cel'};
       var isThe=g.prop.root.type==='the';
-
-      h+='<div class="rcard">';
-      h+='<div class="rcard-head">'+g.prop.name;
-      h+='<span class="badge '+statusCls[status]+'">'+statusLbl[status]+'</span>';
-      if(tutarli) h+='<span class="badge b-ok">Tutarlı</span>';
-      else        h+='<span class="badge b-no">Tutarsız</span>';
-      if(gecerli) h+='<span class="badge b-ok">Geçerli</span>';
-      else        h+='<span class="badge b-no">Geçersiz</span>';
-      h+='</div>';
-      h+='<div class="rcard-fml">'+ps(g.prop.root)+'</div>';
-
-      // explanation
+      h+='<div class="rcard"><div class="rcard-head">'+g.prop.name
+        +'<span class="badge '+scls[st]+'">'+slbl[st]+'</span>'
+        +'<span class="badge '+(anyD?'b-ok':'b-no')+'">'+(anyD?'Tutarlı':'Tutarsız')+'</span>'
+        +'<span class="badge '+(allD?'b-ok':'b-no')+'">'+(allD?'Geçerli':'Geçersiz')+'</span>'
+        +'</div><div class="rcard-fml">'+ps(g.prop.root)+'</div>';
       if(isThe){
-        // argument
-        if(gecerli){
-          h+='<div class="rn">Çıkarım önermesi tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> değerini almaktadır. Çıkarım <strong>tutarlı ve geçerlidir</strong>.</div>';
-        } else {
-          h+='<div class="rn">Çıkarım önermesi <strong>'+falseCount+'</strong> satirda <span class="vY">Y</span> değerini almaktadır. Çıkarım <strong>geçersizdir</strong>'+(tutarli?', ancak tutarlıdır':'</div>');
-          if(tutarli) h+='.</div>';
-        }
+        h+='<div class="rn">'+(allD?'Çıkarım tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — tutarlı ve geçerlidir.'
+          :fc+' satırda <span class="vY">Y</span> — geçersizdir'+(anyD?', ancak tutarlıdır.':'.</div>'));
+        if(allD||!anyD)h+='</div>';
       } else {
-        if(allD){
-          h+='<div class="rn">Tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — hem tutarlı hem geçerlidir.</div>';
-        } else if(anyD){
-          h+='<div class="rn"><strong>'+trueCount+'</strong> satırda <span class="vD">D</span>, <strong>'+falseCount+'</strong> satırda <span class="vY">Y</span> — tutarlı ancak geçerli degildir.</div>';
-        } else {
-          h+='<div class="rn">Hiçbir satırda <span class="vD">D</span> değeri alınmamaktadır — tutarsız ve geçersizdir.</div>';
-        }
+        if(allD)h+='<div class="rn">Tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — hem tutarlı hem geçerlidir.</div>';
+        else if(anyD)h+='<div class="rn"><strong>'+tc+'</strong> satırda <span class="vD">D</span>, <strong>'+fc+'</strong> satırda <span class="vY">Y</span> — tutarlı ancak geçerli değildir.</div>';
+        else h+='<div class="rn">Hiçbir satırda <span class="vD">D</span> değeri alınmamaktadır — tutarsız ve geçersizdir.</div>';
       }
-      h+='</div>'; // rcard
+      h+='</div>';
     });
-
-    // ── Equivalence between each pair ──
     if(groups.length>=2){
       h+='<div style="margin-top:.25rem;font-family:var(--mono);font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:.55rem">Eşdeğerlik Denetlemeleri</div>';
       for(var i=0;i<groups.length;i++){
         for(var j=i+1;j<groups.length;j++){
           var g1=groups[i],g2=groups[j];
           var equiv=rows.every(function(r){return r[g1.mainCol]===r[g2.mainCol];});
-          var diffCount=rows.filter(function(r){return r[g1.mainCol]!==r[g2.mainCol];}).length;
-          h+='<div class="eq-card">';
-          h+='<div class="eq-head"><span>'+g1.prop.name+'</span><span class="eq-sym">'+(equiv?'&#8801;':'&#8802;')+'</span><span>'+g2.prop.name+'</span>';
-          if(equiv) h+='<span class="badge b-ok">Eşdeğer</span>';
-          else      h+='<span class="badge b-no">Eşdeğer Değil</span>';
-          h+='</div>';
-          if(equiv){
-            h+='<div class="rn">Her satırda aynı doğruluk değeri alınmaktadır — önermeler birbirine eşdeğerdir.</div>';
-          } else {
-            h+='<div class="rn"><strong>'+diffCount+'</strong> satırda farklı değer alınmaktadır — önermeler eşdeğer değildir.</div>';
-          }
-          h+='</div>';
+          var dc=rows.filter(function(r){return r[g1.mainCol]!==r[g2.mainCol];}).length;
+          h+='<div class="eq-card"><div class="eq-head"><span>'+g1.prop.name+'</span><span class="eq-sym">'+(equiv?'&#8801;':'&#8802;')+'</span><span>'+g2.prop.name+'</span>'
+            +'<span class="badge '+(equiv?'b-ok':'b-no')+'">'+(equiv?'Eşdeğer':'Eşdeğer Değil')+'</span></div>'
+            +'<div class="rn">'+(equiv?'Her satırda aynı doğruluk değeri alınmaktadır — eşdeğerdir.':'<strong>'+dc+'</strong> satırda farklı değer — eşdeğer değildir.')+'</div></div>';
         }
       }
     }
-
-    h+='</div>'; // rcards
-    h+='</div>'; // fi
+    h+='</div></div>';
     res.innerHTML=h;
   }catch(e){res.innerHTML='<div class="err">'+e.message+'</div>';}
+};
+
+// ═══════════════════════════════════════════════
+// TABLEAU ENGINE
+// ═══════════════════════════════════════════════
+
+var T_LIMIT=300; // max formula nodes
+
+function tNeg(n){return{type:'not',value:n};}
+
+function tIsLit(n){
+  return n.type==='var'||(n.type==='not'&&n.value&&n.value.type==='var');
+}
+
+// Returns the decomposition rule for a formula, or null if it's a literal.
+// type 'A' = alpha (linear), type 'B' = beta (branching)
+function tRule(n){
+  if(tIsLit(n))return null;
+  if(n.type==='and')   return{type:'A',fs:[n.left,n.right],sym:'\u2227'};
+  if(n.type==='or')    return{type:'B',l:[n.left],r:[n.right],sym:'\u2228'};
+  if(n.type==='imp'||n.type==='the') return{type:'B',l:[tNeg(n.left)],r:[n.right],sym:n.type==='the'?'\u2234':'\u2192'};
+  if(n.type==='iff')   return{type:'B',l:[n.left,n.right],r:[tNeg(n.left),tNeg(n.right)],sym:'\u2194'};
+  if(n.type==='not'){
+    var i=n.value;
+    if(!i)return null;
+    if(i.type==='not')  return{type:'A',fs:[i.value],sym:'\u00AC\u00AC'};
+    if(i.type==='and')  return{type:'B',l:[tNeg(i.left)],r:[tNeg(i.right)],sym:'\u00AC\u2227'};
+    if(i.type==='or')   return{type:'A',fs:[tNeg(i.left),tNeg(i.right)],sym:'\u00AC\u2228'};
+    if(i.type==='imp'||i.type==='the') return{type:'A',fs:[i.left,tNeg(i.right)],sym:i.type==='the'?'\u00AC\u2234':'\u00AC\u2192'};
+    if(i.type==='iff')  return{type:'B',l:[i.left,tNeg(i.right)],r:[tNeg(i.left),i.right],sym:'\u00AC\u2194'};
+  }
+  return null;
+}
+
+// Find a contradiction (literal A and ¬A) among items on the current path.
+// Returns [rowOfA, rowOfNotA] or null.
+function tContr(items){
+  var pos={},neg={};
+  items.forEach(function(it){
+    var n=it.ast;
+    if(n.type==='var') pos[n.name]=it.row;
+    else if(n.type==='not'&&n.value&&n.value.type==='var') neg[n.value.name]=it.row;
+  });
+  for(var nm in pos){ if(neg.hasOwnProperty(nm)) return[pos[nm],neg[nm]]; }
+  return null;
+}
+
+// Recursively build the tableau tree.
+// segRows: formulas displayed at this segment (the "header" rows)
+// allPath: all formulas accumulated on this branch path (including segRows)
+// procSet: Set of row numbers that have been processed
+// rowCtr: {n: current row counter}
+function tBuild(segRows,allPath,procSet,rowCtr){
+  if(rowCtr.n>T_LIMIT) throw new Error('Çizelge sınır aşıldı ('+T_LIMIT+' adım). Daha basit bir formül deneyin.');
+
+  // 1. Check for contradiction
+  var contr=tContr(allPath);
+  if(contr) return{type:'closed',rows:segRows,closedBy:contr};
+
+  // 2. Find first unprocessed non-literal on the path
+  var toProc=null;
+  for(var i=0;i<allPath.length;i++){
+    if(!procSet.has(allPath[i].row)&&tRule(allPath[i].ast)){toProc=allPath[i];break;}
+  }
+
+  // 3. If none, branch is complete and open
+  if(!toProc) return{type:'open',rows:segRows};
+
+  // 4. Apply rule
+  var newProc=new Set(procSet);
+  newProc.add(toProc.row);
+  var rule=tRule(toProc.ast);
+
+  if(rule.type==='A'){
+    // Alpha: add formulas linearly, continue on same branch
+    var newItems=rule.fs.map(function(f){return{row:++rowCtr.n,ast:f,fromRow:toProc.row,sym:rule.sym};});
+    var child=tBuild(newItems,allPath.concat(newItems),newProc,rowCtr);
+    return{type:'alpha',rows:segRows,procRow:toProc.row,sym:rule.sym,child:child};
+  } else {
+    // Beta: split branch
+    var lItems=rule.l.map(function(f){return{row:++rowCtr.n,ast:f,fromRow:toProc.row,sym:rule.sym};});
+    var rItems=rule.r.map(function(f){return{row:++rowCtr.n,ast:f,fromRow:toProc.row,sym:rule.sym};});
+    var lChild=tBuild(lItems,allPath.concat(lItems),newProc,rowCtr);
+    var rChild=tBuild(rItems,allPath.concat(rItems),newProc,rowCtr);
+    return{type:'beta',rows:segRows,procRow:toProc.row,sym:rule.sym,left:lChild,right:rChild};
+  }
+}
+
+// Collect all processed row numbers from the tree
+function tMarkProc(seg,set){
+  if(seg.procRow) set.add(seg.procRow);
+  if(seg.child)  tMarkProc(seg.child,set);
+  if(seg.left)   tMarkProc(seg.left,set);
+  if(seg.right)  tMarkProc(seg.right,set);
+}
+
+// Is every branch closed?
+function tAllClosed(seg){
+  if(seg.type==='closed') return true;
+  if(seg.type==='open')   return false;
+  if(seg.type==='alpha')  return tAllClosed(seg.child);
+  if(seg.type==='beta')   return tAllClosed(seg.left)&&tAllClosed(seg.right);
+  return false;
+}
+
+// Collect literals from first open branch (for model display)
+function tOpenModel(seg){
+  if(seg.type==='open'){
+    var model={};
+    (seg.rows||[]).forEach(function(it){
+      if(it.ast.type==='var') model[it.ast.name]=true;
+      else if(it.ast.type==='not'&&it.ast.value&&it.ast.value.type==='var') model[it.ast.value.name]=false;
+    });
+    return model;
+  }
+  if(seg.type==='alpha') return tOpenModel(seg.child);
+  if(seg.type==='beta'){
+    if(!tAllClosed(seg.left))  return tOpenModel(seg.left);
+    if(!tAllClosed(seg.right)) return tOpenModel(seg.right);
+  }
+  return null;
+}
+
+// ── TABLEAU RENDERER ──
+// Renders the content of a branch (rows + continuation).
+// Each segment may continue linearly (alpha) or fork (beta).
+function renderBranch(seg,procSet){
+  // collect rows for this segment
+  var rowsHtml='';
+  (seg.rows||[]).forEach(function(it){
+    var proc=procSet.has(it.row);
+    rowsHtml+='<div class="t-row">'
+      +'<span class="t-rn">'+it.row+'.</span>'
+      +'<span class="t-fm">'+ps(it.ast)+'</span>'
+      +(proc?'<span class="t-ck">&thinsp;&#10003;</span>':'')
+      +(it.fromRow!=null?'<span class="t-ref">&thinsp;('+it.fromRow+',&thinsp;'+it.sym+')</span>':'')
+      +'</div>';
+  });
+
+  var h=(rowsHtml?'<div class="t-rows">'+rowsHtml+'</div>':'');
+
+  if(seg.type==='closed'){
+    // ✗ with the two contradicting row numbers
+    h+='<div class="t-closed">&#215;&ensp;('+seg.closedBy[0]+',&thinsp;'+seg.closedBy[1]+')</div>';
+  } else if(seg.type==='open'){
+    h+='<div class="t-open">&#9675;</div>';
+  } else if(seg.type==='alpha'){
+    // linear continuation — just keep building downward
+    h+=renderBranch(seg.child,procSet);
+  } else if(seg.type==='beta'){
+    // fork: vertical connector → horizontal bar → two sub-trees
+    h+='<div class="t-vline"></div>'
+      +'<div class="t-split">'
+      +'<div class="t-bl"><div class="t-tree">'+renderBranch(seg.left,procSet)+'</div></div>'
+      +'<div class="t-br"><div class="t-tree">'+renderBranch(seg.right,procSet)+'</div></div>'
+      +'</div>';
+  }
+  return h;
+}
+
+function renderTSeg(seg,procSet){
+  return '<div class="t-tree">'+renderBranch(seg,procSet)+'</div>';
+}
+
+// ═══════════════════════════════════════════════
+// RUN — TABLEAU
+// ═══════════════════════════════════════════════
+
+window.runChizelge=function(){
+  var ids=[];
+  document.querySelectorAll('.achk:checked').forEach(function(e){ids.push(e.value);});
+  var res=document.getElementById('chi-res');
+  var chiSec=document.getElementById('chi-sec');
+  if(!ids.length){chiSec.style.display='none';res.innerHTML='';return;}
+
+  var selProps=ids.map(function(id){return props.find(function(p){return p.id===id;});});
+
+  // Build initial formula list.
+  // ∴ formula → convert to {left, ¬right} (validity check for the inference).
+  var initAsts=[];
+  var hasThe=false;
+  selProps.forEach(function(p){
+    if(p.root.type==='the'){
+      initAsts.push(p.root.left);
+      initAsts.push(tNeg(p.root.right));
+      hasThe=true;
+    } else {
+      initAsts.push(p.root);
+    }
+  });
+
+  try{
+    var rowCtr={n:initAsts.length};
+    var startItems=initAsts.map(function(ast,i){return{row:i+1,ast:ast,fromRow:null,sym:null};});
+    var seg=tBuild(startItems,startItems,new Set(),rowCtr);
+
+    var procSet=new Set();
+    tMarkProc(seg,procSet);
+
+    var allClosed=tAllClosed(seg);
+    var openModel=allClosed?null:tOpenModel(seg);
+
+    var h='<div class="fi">';
+
+    // Banner
+    var bannerOk=hasThe?allClosed:!allClosed;
+    // For tutarlılık: open=ok. For validity (∴): closed=ok.
+    h+='<div class="res-banner '+(bannerOk?'banner-ok':'banner-fail')+'">'
+      +'<span>'+(allClosed?'&#9632;':'&#9633;')+'</span>';
+    if(hasThe){
+      h+='<span>'+(allClosed?'Geçerli Çıkarım &mdash; Kapalı Çizelge':'Geçersiz Çıkarım &mdash; Açık Çizelge')+'</span>';
+    } else {
+      h+='<span>'+(allClosed?'Tutarsız &mdash; Kapalı Çizelge':'Tutarlı &mdash; Açık Çizelge')+'</span>';
+    }
+    h+='</div>';
+
+    // Info box
+    h+='<div class="tab-info">';
+    if(hasThe){
+      h+='<strong>∴ çıkarımı geçerlilik denetimi:</strong> öncül ve <span style="font-family:var(--mono)">¬</span>sonuç çizelgeye konulur.<br>'
+        +(allClosed
+          ?'Tüm yollar kapalıdır — öncül doğruyken sonucun yanlış olduğu olanaklı bir durum yoktur. Çıkarım <strong>geçerlidir</strong>.'
+          :'En az bir açık yol vardır — öncülün doğru, sonucun yanlış olduğu bir durum vardır. Çıkarım <strong>geçersizdir</strong>.');
+    } else {
+      h+='<strong>Tutarlılık denetimi:</strong> formüller çizelgeye konulur.<br>'
+        +(allClosed
+          ?'Tüm yollar kapalıdır — önerme(ler)in hepsinin aynı anda doğru olduğu olanaklı bir durum yoktur. Küme <strong>tutarsızdır</strong>.'
+          :'En az bir açık yol (&#9675;) bulunmaktadır — önerme(ler) aynı anda doğru olabilir. Küme <strong>tutarlıdır</strong>.');
+    }
+    h+='</div>';
+
+    // Open branch model
+    if(!allClosed&&openModel&&Object.keys(openModel).length>0){
+      h+='<div class="tab-open-model">';
+      Object.keys(openModel).sort().forEach(function(v){
+        var val=openModel[v];
+        h+='<span class="tab-model-var"><span style="font-family:var(--mono);font-size:.7rem">'+v+' = </span>'
+          +'<span class="'+(val?'vD':'vY')+'" style="font-size:.72rem">'+(val?'D':'Y')+'</span></span>';
+      });
+      h+='</div>';
+    }
+
+    // Çözümleme kuralları legend
+    h+='<div style="font-family:var(--mono);font-size:.62rem;color:var(--text2);margin:.6rem 0 .3rem">'
+      +'<strong>Semboller:</strong> &#10003; = çözümlendi &nbsp;|&nbsp; &#215;(r,s) = r ve s satırları çelişiyor, yol kapalı &nbsp;|&nbsp; &#9675; = açık yol</div>';
+
+    // Tableau tree
+    h+='<div style="overflow-x:auto;margin-top:.6rem"><div class="tab-wrap">'+renderTSeg(seg,procSet)+'</div></div>';
+    h+='</div>';
+
+    res.innerHTML=h;
+    chiSec.style.display='';
+  }catch(e){
+    res.innerHTML='<div class="err">'+e.message+'</div>';
+    chiSec.style.display='';
+  }
 };
 
 // ═══════════════════════════════════════════════
@@ -611,17 +808,13 @@ document.addEventListener('drop',function(e){
     e.preventDefault();s.classList.remove('over');
     var path=s.dataset.path;
     if(!canDrop(dragging.type,path)){
-      // flash slot red briefly
       s.style.borderColor='var(--accent)';setTimeout(function(){s.style.borderColor='';},600);
       dragging=null;return;
     }
     setAt(s.dataset.pid,path,mkNode(dragging.type,dragging.name));
-    dragging=null;
-    document.getElementById('ana-res').innerHTML='';
-    renderAll();
+    dragging=null;clrAna();renderAll();
   }
 });
-
 function attachDrag(el){
   el.addEventListener('dragstart',function(){
     if(el.classList.contains('disabled'))return;
