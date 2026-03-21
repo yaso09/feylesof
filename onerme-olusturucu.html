@@ -128,6 +128,14 @@ table.tt tr.rf td{background:#fef0ee}
 .ls{width:1rem;height:.68rem;border:1px solid rgba(0,0,0,.1)}
 .ls-t{background:#edf7f0}.ls-f{background:#fef0ee}
 .the-note{font-family:var(--mono);font-size:.68rem;color:var(--pur);padding:.3rem .6rem;background:var(--pur-bg);border:1px solid var(--pur-bd);margin-top:.5rem}
+/* multi-premise ∴ node */
+.the-node{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.22rem;padding:.14rem .32rem;border:1.5px solid var(--pur-bd);background:var(--pur-bg);vertical-align:middle}
+.the-prems{display:inline-flex;align-items:center;gap:.18rem;flex-wrap:wrap}
+.the-comma{font-family:var(--mono);font-size:.82rem;color:var(--text2);margin-right:.06rem}
+.the-add-btn{display:inline-flex;align-items:center;justify-content:center;width:1.15rem;height:1.15rem;font-family:var(--mono);font-size:.78rem;font-weight:700;background:transparent;border:1px dashed var(--pur-bd);color:var(--pur);cursor:pointer;line-height:1;flex-shrink:0;transition:all .12s}
+.the-add-btn:hover{background:var(--pur);color:#fff;border-style:solid}
+.the-dprem{display:inline-flex;align-items:center;justify-content:center;width:.88rem;height:.88rem;padding:0;margin-left:.08rem;background:transparent;border:1px solid var(--pur-bd);color:var(--pur);font-size:.56rem;cursor:pointer;line-height:1;transition:all .12s;flex-shrink:0}
+.the-dprem:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
 .res-banner{display:flex;align-items:center;gap:.6rem;padding:.55rem .9rem;margin-bottom:.65rem;font-family:var(--mono);font-size:.78rem;font-weight:600;border-width:1.5px;border-style:solid}
 .banner-ok{background:#e8f7ed;border-color:#8cbfa0;color:var(--green)}
 .banner-fail{background:#fff0ed;border-color:#c4a0a0;color:var(--accent)}
@@ -209,7 +217,7 @@ table.tt tr.rf td{background:#fef0ee}
       <div class="toks">
         <div class="tok tt" id="tok-the" draggable="true" data-type="the">&#8756; O HALDE</div>
       </div>
-      <div class="the-note">Yalnızca kök konumunda kullanılabilir.</div>
+      <div class="the-note">Yalnızca kök. Sol taraf: virgülle ayrılmış öncüller (+). Sağ taraf: sonuç.</div>
     </div>
   </aside>
 
@@ -262,7 +270,7 @@ function ps(n){
     case'or': return'('+ps(n.left)+'\u2228'+ps(n.right)+')';
     case'imp':return'('+ps(n.left)+'\u2192'+ps(n.right)+')';
     case'iff':return'('+ps(n.left)+'\u2194'+ps(n.right)+')';
-    case'the':return ps(n.left)+' \u2234 '+ps(n.right);
+    case'the':return(n.premises||[]).map(ps).join(', ')+' \u2234 '+ps(n.conclusion||null);
     default:return'?';
   }
 }
@@ -271,6 +279,7 @@ function isOk(n){
   if(!n)return false;
   if(n.type==='var')return true;
   if(n.type==='not')return isOk(n.value);
+  if(n.type==='the')return n.premises.length>0&&n.premises.every(isOk)&&isOk(n.conclusion);
   return isOk(n.left)&&isOk(n.right);
 }
 
@@ -282,7 +291,11 @@ function ev(n,v){
     case'or': return ev(n.left,v)||ev(n.right,v);
     case'imp':return!ev(n.left,v)||ev(n.right,v);
     case'iff':return ev(n.left,v)===ev(n.right,v);
-    case'the':return!ev(n.left,v)||ev(n.right,v);
+    case'the':{
+      // (p1 ∧ p2 ∧ ...) → conclusion
+      var premTrue=n.premises.every(function(p){return ev(p,v);});
+      return!premTrue||ev(n.conclusion,v);
+    }
   }
   return false;
 }
@@ -290,20 +303,33 @@ function ev(n,v){
 function cvars(n,s){
   if(!s)s=new Set();if(!n)return s;
   if(n.type==='var')s.add(n.name);
-  else{cvars(n.left,s);cvars(n.right,s);cvars(n.value,s);}
+  else if(n.type==='the'){
+    (n.premises||[]).forEach(function(p){cvars(p,s);});
+    cvars(n.conclusion,s);
+  } else{cvars(n.left,s);cvars(n.right,s);cvars(n.value,s);}
   return s;
 }
 
 function dep(n){
   if(!n||n.type==='var')return 0;
   if(n.type==='not')return 1+dep(n.value);
+  if(n.type==='the'){
+    var mx=dep(n.conclusion)||0;
+    (n.premises||[]).forEach(function(p){mx=Math.max(mx,dep(p)||0);});
+    return 1+mx;
+  }
   return 1+Math.max(dep(n.left)||0,dep(n.right)||0);
 }
 
 function allSubs(n,l,se){
   if(!l)l=[];if(!se)se=new Set();if(!n)return l;
   var s=ps(n);if(!se.has(s)){se.add(s);l.push(n);}
-  if(n.left)allSubs(n.left,l,se);if(n.right)allSubs(n.right,l,se);if(n.value)allSubs(n.value,l,se);
+  if(n.type==='the'){
+    (n.premises||[]).forEach(function(p){allSubs(p,l,se);});
+    allSubs(n.conclusion,l,se);
+  } else {
+    if(n.left)allSubs(n.left,l,se);if(n.right)allSubs(n.right,l,se);if(n.value)allSubs(n.value,l,se);
+  }
   return l;
 }
 
@@ -355,11 +381,23 @@ function setAt(pid,path,val){
 function mkNode(type,name){
   if(type==='var')return{type:'var',name:name};
   if(type==='not')return{type:'not',value:null};
+  if(type==='the')return{type:'the',premises:[null],conclusion:null};
   return{type:type,left:null,right:null};
 }
 window.delNode=function(pid,path){setAt(pid,path,null);clrAna();renderAll();};
 window.clearAT=function(){var p=getAP();if(p){p.root=null;clrAna();renderAll();}};
 
+window.addPremise=function(pid){
+  var prop=props.find(function(p){return p.id===pid;});
+  if(!prop||!prop.root||prop.root.type!=='the')return;
+  prop.root.premises.push(null);clrAna();renderAll();
+};
+window.delPremise=function(pid,idx){
+  var prop=props.find(function(p){return p.id===pid;});
+  if(!prop||!prop.root||prop.root.type!=='the')return;
+  if(prop.root.premises.length<=1)return; // always keep at least 1
+  prop.root.premises.splice(idx,1);clrAna();renderAll();
+};
 function canDrop(type,slotPath){
   if(type==='the'&&slotPath!=='root')return false;
   return true;
@@ -380,10 +418,26 @@ function rNode(pid,n,path){
   var d='<button class="dl" onclick="delNode(\''+pid+'\',\''+path+'\')" title="Sil">&#215;</button>';
   if(n.type==='var')return'<span class="nv"><span>'+n.name+'</span>'+d+'</span>';
   if(n.type==='not')return'<span class="nu"><span class="ops u">&#172;</span>'+rNode(pid,n.value,path+'.value')+d+'</span>';
-  var S={and:'&#8743;',or:'&#8744;',imp:'&#8594;',iff:'&#8596;',the:'&#8756;'};
-  var isThe=n.type==='the';
-  return'<span class="nb'+(isThe?' nt':'')+'">'+rNode(pid,n.left,path+'.left')
-    +'<span class="ops '+(isThe?'t':'b')+'">'+S[n.type]+'</span>'
+  if(n.type==='the'){
+    // multi-premise: P₁, P₂, … ∴ C
+    var premsHtml='<span class="the-prems">';
+    n.premises.forEach(function(p,i){
+      if(i>0)premsHtml+='<span class="the-comma">,</span>';
+      premsHtml+=rNode(pid,p,path+'.premises.'+i);
+      if(n.premises.length>1){
+        premsHtml+='<button class="the-dprem" onclick="delPremise(\''+pid+'\','+i+')" title="Öncülü Sil">&#215;</button>';
+      }
+    });
+    premsHtml+='</span>';
+    var addBtn='<button class="the-add-btn" onclick="addPremise(\''+pid+'\')" title="Öncül Ekle">+</button>';
+    var concHtml=rNode(pid,n.conclusion,path+'.conclusion');
+    return'<span class="the-node">'+premsHtml+addBtn
+      +'<span class="ops t" style="font-size:1.05rem;margin:0 .28rem">&#8756;</span>'
+      +concHtml+d+'</span>';
+  }
+  var S={and:'&#8743;',or:'&#8744;',imp:'&#8594;',iff:'&#8596;'};
+  return'<span class="nb">'+rNode(pid,n.left,path+'.left')
+    +'<span class="ops b">'+S[n.type]+'</span>'
     +rNode(pid,n.right,path+'.right')+d+'</span>';
 }
 
@@ -502,16 +556,27 @@ window.runAna=function(){
       var slbl={tot:'Totoloji',olu:'Olumsal',cel:'Çelişki'};
       var scls={tot:'b-tot',olu:'b-olu',cel:'b-cel'};
       var isThe=g.prop.root.type==='the';
+      // build conditional string for display: (P1∧P2∧…)→C
+      var condStr='';
+      if(isThe){
+        var prems=g.prop.root.premises;
+        var concNode=g.prop.root.conclusion;
+        var premStr=prems.length===1?ps(prems[0]):'('+prems.map(ps).join('\u2227')+')';
+        condStr=premStr+'\u2192'+ps(concNode);
+      }
       h+='<div class="rcard"><div class="rcard-head">'+g.prop.name
         +'<span class="badge '+scls[st]+'">'+slbl[st]+'</span>'
         +'<span class="badge '+(anyD?'b-ok':'b-no')+'">'+(anyD?'Tutarlı':'Tutarsız')+'</span>'
         +'<span class="badge '+(allD?'b-ok':'b-no')+'">'+(allD?'Geçerli':'Geçersiz')+'</span>'
-        +'</div><div class="rcard-fml">'+ps(g.prop.root)+'</div>';
+        +'</div>';
       if(isThe){
+        h+='<div class="rcard-fml" style="border-left-color:var(--pur-bd)">'+ps(g.prop.root)+'</div>';
+        h+='<div class="rcard-fml" style="font-size:.67rem;color:var(--text2);border-left-color:var(--border)">Eşdeğer koşullu: <span style="color:var(--text)">'+condStr+'</span></div>';
         h+='<div class="rn">'+(allD?'Çıkarım tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — tutarlı ve geçerlidir.'
-          :fc+' satırda <span class="vY">Y</span> — geçersizdir'+(anyD?', ancak tutarlıdır.':'.</div>'));
-        if(allD||!anyD)h+='</div>';
+          :'<strong>'+fc+'</strong> satırda <span class="vY">Y</span> — geçersizdir'+(anyD?', ancak tutarlıdır.':'.')+'</div>');
+        if(allD)h+='</div>';
       } else {
+        h+='<div class="rcard-fml">'+ps(g.prop.root)+'</div>';
         if(allD)h+='<div class="rn">Tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — hem tutarlı hem geçerlidir.</div>';
         else if(anyD)h+='<div class="rn"><strong>'+tc+'</strong> satırda <span class="vD">D</span>, <strong>'+fc+'</strong> satırda <span class="vY">Y</span> — tutarlı ancak geçerli değildir.</div>';
         else h+='<div class="rn">Hiçbir satırda <span class="vD">D</span> değeri alınmamaktadır — tutarsız ve geçersizdir.</div>';
@@ -554,7 +619,7 @@ function tRule(n){
   if(tIsLit(n))return null;
   if(n.type==='and')   return{type:'A',fs:[n.left,n.right],sym:'\u2227'};
   if(n.type==='or')    return{type:'B',l:[n.left],r:[n.right],sym:'\u2228'};
-  if(n.type==='imp'||n.type==='the') return{type:'B',l:[tNeg(n.left)],r:[n.right],sym:n.type==='the'?'\u2234':'\u2192'};
+  if(n.type==='imp')   return{type:'B',l:[tNeg(n.left)],r:[n.right],sym:'\u2192'};
   if(n.type==='iff')   return{type:'B',l:[n.left,n.right],r:[tNeg(n.left),tNeg(n.right)],sym:'\u2194'};
   if(n.type==='not'){
     var i=n.value;
@@ -562,7 +627,7 @@ function tRule(n){
     if(i.type==='not')  return{type:'A',fs:[i.value],sym:'\u00AC\u00AC'};
     if(i.type==='and')  return{type:'B',l:[tNeg(i.left)],r:[tNeg(i.right)],sym:'\u00AC\u2227'};
     if(i.type==='or')   return{type:'A',fs:[tNeg(i.left),tNeg(i.right)],sym:'\u00AC\u2228'};
-    if(i.type==='imp'||i.type==='the') return{type:'A',fs:[i.left,tNeg(i.right)],sym:i.type==='the'?'\u00AC\u2234':'\u00AC\u2192'};
+    if(i.type==='imp')  return{type:'A',fs:[i.left,tNeg(i.right)],sym:'\u00AC\u2192'};
     if(i.type==='iff')  return{type:'B',l:[i.left,tNeg(i.right)],r:[tNeg(i.left),i.right],sym:'\u00AC\u2194'};
   }
   return null;
@@ -712,13 +777,13 @@ window.runChizelge=function(){
   var selProps=ids.map(function(id){return props.find(function(p){return p.id===id;});});
 
   // Build initial formula list.
-  // ∴ formula → convert to {left, ¬right} (validity check for the inference).
+  // ∴ formula → push all premises + ¬conclusion (validity check)
   var initAsts=[];
   var hasThe=false;
   selProps.forEach(function(p){
     if(p.root.type==='the'){
-      initAsts.push(p.root.left);
-      initAsts.push(tNeg(p.root.right));
+      p.root.premises.forEach(function(pr){initAsts.push(pr);});
+      initAsts.push(tNeg(p.root.conclusion));
       hasThe=true;
     } else {
       initAsts.push(p.root);
