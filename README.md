@@ -2,8 +2,6 @@
 
 **Feylesof**, önermeler mantığı (propositional logic) üzerine kurulu, görsel bir mantık analiz ve çözümleme aracıdır. Kullanıcıların karmaşık mantıksal ifadeleri sürükle-bırak yöntemiyle oluşturmasına, bu ifadelerin doğruluk tablolarını incelemesine ve çeşitli mantıksal denetlemeler (tutarlılık, geçerlilik, eşdeğerlik) yapmasına olanak tanır.
 
-![Ekran Görüntüsü](https://via.placeholder.com/800x400?text=Feylesof+Görsel+Mantık+Analiz)
-
 ## ✨ Öne Çıkan Özellikler
 
 - **🧩 Görsel Önerme Oluşturucu:** Mantıksal eklemleri (¬, ∧, ∨, →, ↔) ve değişkenleri bir yapboz gibi birleştirerek önermeler inşa edin.
