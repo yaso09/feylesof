@@ -52,9 +52,19 @@ textarea#main-input::placeholder{color:var(--text3)}
 .preview-label{font-family:var(--mono);font-size:.56rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:.38rem}
 .preview-line{font-family:var(--mono);font-size:.78rem;line-height:1.65;color:var(--text);margin:.05rem 0}
 .preview-line .ax-name{color:var(--pur);font-weight:600}
+.preview-line .ax-quant{color:var(--blue);font-weight:600}
 .preview-line .goal-mark{color:var(--green);font-weight:600}
 .preview-line .formula{color:var(--text)}
 .preview-line .err-inline{color:var(--accent);font-size:.7rem}
+.preview-line .q-tag{font-size:.6rem;color:var(--text3);margin-left:.4rem}
+.preview-inst{font-family:var(--mono);font-size:.72rem;color:var(--text2);margin:.02rem 0 .02rem .9rem;line-height:1.6}
+.preview-inst .inst-name{color:var(--blue);font-size:.62rem}
+.inst-block{background:var(--blue-bg);border-left:2px solid var(--blue-bd);padding:.45rem .75rem;margin-bottom:.75rem;font-family:var(--mono);font-size:.73rem}
+.inst-block .inst-head{font-size:.58rem;text-transform:uppercase;letter-spacing:1.2px;color:var(--text3);margin-bottom:.35rem}
+.inst-row{display:grid;grid-template-columns:auto 1fr auto;gap:.2rem .6rem;padding:.1rem 0;align-items:baseline}
+.inst-row .ir-name{color:var(--blue);font-size:.62rem}
+.inst-row .ir-f{color:var(--text)}
+.inst-row .ir-src{color:var(--text3);font-size:.59rem}
 
 .prove-btn{
   margin:.75rem 1.1rem;
@@ -184,24 +194,27 @@ table.tt tr.r-ko td{background:#fff0ed}
     <div class="syn-panel">
       <div class="syn-title">Söz Dizimi</div>
       <div class="syn-table">
-        <code>A1: P</code><span>P, aksiyom 1'dir</span>
-        <code>|- P</code><span>Kanıtlanacak hedef (⊢ P de olur)</span>
-        <code>p, q; r</code><span>p ve q'dan r çıkar</span>
-        <code>=></code><span>→ &nbsp;(ise / koşullu)</span>
-        <code>&lt;=></code><span>↔ &nbsp;(ancak ve ancak)</span>
-        <code>===</code><span>≡ &nbsp;(denk)</span>
-        <code>&amp;&amp;</code><span>∧ &nbsp;(ve)</span>
-        <code>||</code><span>∨ &nbsp;(veya)</span>
+        <code>A1: P</code><span>P aksiyomunu tanımla</span>
+        <code>|- P</code><span>Kanıtlanacak hedef (⊢ de olur)</span>
+        <code>=></code><span>→ &nbsp;(koşullu)</span>
+        <code>&lt;=></code><span>↔ &nbsp;(denklik)</span>
+        <code>&amp;&amp; / ||</code><span>∧ / ∨</span>
         <code>~P</code><span>¬P (değil)</span>
-        <code>a >= b</code><span>a ≥ b</span>
-        <code>a <= b</code><span>a ≤ b</span>
-        <code>her x</code><span>∀x</span>
-        <code>bazı x</code><span>∃x</span>
-        <code>a elemanıdır B</code><span>a ∈ B</span>
+        <code>her x &gt;= 0, P</code><span>∀x(x≥0 → P)</span>
+        <code>bazı x &gt; 0, P</code><span>∃x(x&gt;0 ∧ P)</span>
+        <code>her x elem. A, P</code><span>∀x∈A, P(x)</span>
+        <code>her x, P</code><span>∀x, P(x) (koşulsuz)</span>
+        <code>t elemanıdır A</code><span>t ∈ A</span>
+        <code>a = 5</code><span>a=5 (eşitlik gerçeği)</span>
+        <code>a &gt;= b</code><span>a≥b (karşılaştırma)</span>
       </div>
       <div class="syn-note">
-        Atom adı serbesttir: x&gt;0, isPrime(n),<br>
-        n≥2, Sokrates_ölümlüdür, A₁ …<br>
+        Niceleyiciler, eşitlik zinciri ve aritmetik<br>
+        karşılaştırma ile otomatik örneklenir:<br><br>
+        her x &gt;= 0, x elem. N<br>
+        a = 5 &nbsp;→&nbsp; a≥0 kontrol: 5≥0 ✓<br>
+        → H1[a]: a∈N türetilir<br><br>
+        Atom adı serbesttir: isPrime(n), x&gt;0…<br>
         // ile satır sonuna yorum eklenebilir.
       </div>
     </div>
@@ -239,16 +252,120 @@ function normalizeFormula(text) {
   // >= and <= (keep as atoms for math propositions)
   text = text.replace(/>=/g, '≥');
   text = text.replace(/<=/g, '≤');
-  // Turkish quantifiers
-  text = text.replace(/\bher\s+(\S+)/g, '∀$1');
-  text = text.replace(/\bbazı\s+(\S+)/g, '∃$1');
-  text = text.replace(/\b(\S+)\s+eleman[ıi]d[ıi]r\s+(\S+)/g, '$1∈$2');
+  // Turkish quantifiers (simple, non-set forms)
+  text = text.replace(/\bher\s+(\S+)/g, '\u2200$1');
+  text = text.replace(/\bbaz\u0131\s+(\S+)/g, '\u2203$1');
+  text = text.replace(/\b(\S+)\s+eleman[ıi]d[ıi]r\s+(\S+)/g, '$1\u2208$2');
+  // Collapse spaces around comparison/relation operators so "x > 0" becomes "x>0" (single atom).
+  // Safe because logical connectives are already Unicode (→ ↔ ∧ ∨ ¬) and not in [><>=!].
+  text = text.replace(/(\S)\s+([><\u2265\u2264\u2260=!]+)\s+(\S)/g, function(m,a,op,b){return a+op+b;});
   return text.trim();
 }
 
 // Normalize a single line (for formula fields)
 function normLine(text) {
   return normalizeFormula(text);
+}
+
+// ── detectQuantifier: parse a line body into quantifier object or regular axiom ──
+function detectQuantifier(name, body) {
+  var b = body.trim();
+  var isForall = /^her\s+/i.test(b);
+  var isExists = /^baz[ıi]\s+/i.test(b);
+  var qtype = isForall ? 'forall' : isExists ? 'exists' : null;
+  if (!qtype) {
+    return {name:name, raw:normLine(b), ast:null, err:null};
+  }
+
+  // Strip the quantifier keyword and grab the variable
+  // Supports: "her"/"bazı" + var + GUARD + "," + CONCLUSION
+  var rest = b.replace(/^(her|baz[ıi])\s+/i, '');
+  // Variable is the first token (runs until whitespace or special char)
+  var varMatch = rest.match(/^(\S+)\s*(.*)/);
+  if (!varMatch) return {name:name, raw:normLine(b), ast:null, err:null};
+  var qv = varMatch[1];
+  var afterVar = varMatch[2].trim(); // everything after the variable
+
+  // Distinguish guard types:
+  // 1. "elemanıdır SET, PRED"   → domain guard
+  // 2. "RELOP VAL, PRED"        → right-hand relop:  x >= 0, P   OR   >= 0, P
+  // 3. "VAL RELOP, PRED"        → inverted: handled similarly
+  // 4. ", PRED"                 → no guard (simple)
+  // The comma separates guard from conclusion. The guard may itself contain commas
+  // in complex expressions — but we use the LAST top-level comma before the conclusion.
+  // Heuristic: the first comma that is NOT inside parentheses separates guard from conclusion.
+
+  var domainMatch = afterVar.match(/^eleman[ıi]d[ıi]r\s+(\S+)\s*,\s*(.+)$/i);
+  if (domainMatch) {
+    // Pattern: "her x elemanıdır SET, PRED"
+    var dom=domainMatch[1], pred=domainMatch[2].trim();
+    return {name:name, type:qtype, quantVar:qv,
+      guardType:'member', domain:dom, guardTemplate:qv+'\u2208'+dom,
+      concTemplate:pred,
+      raw:'\u2200'+qv+'\u2208'+dom+', '+pred,
+      displayFull:(qtype==='forall'?'\u2200':'\u2203')+qv+'('+qv+'\u2208'+dom+(qtype==='forall'?' \u2192 ':' \u2227 ')+pred+')',
+      ast:null, err:null};
+  }
+
+  // Try to split at first top-level comma
+  var commaIdx = findTopLevelComma(afterVar);
+  if (commaIdx < 0) {
+    // No comma — maybe "her x PRED" (no guard, no comma)
+    var pred2 = afterVar.trim();
+    if (!pred2) return {name:name, raw:normLine(b), ast:null, err:null};
+    return {name:name, type:qtype, quantVar:qv,
+      guardType:'none', guardTemplate:null, concTemplate:pred2,
+      raw:(qtype==='forall'?'\u2200':'\u2203')+qv+', '+pred2,
+      displayFull:(qtype==='forall'?'\u2200':'\u2203')+qv+'('+pred2+')',
+      ast:null, err:null};
+  }
+
+  var guardRaw = afterVar.slice(0, commaIdx).trim();
+  var concRaw  = afterVar.slice(commaIdx+1).trim();
+
+  if (!guardRaw) {
+    // "her x, PRED"  — no guard
+    return {name:name, type:qtype, quantVar:qv,
+      guardType:'none', guardTemplate:null, concTemplate:concRaw,
+      raw:(qtype==='forall'?'\u2200':'\u2203')+qv+', '+concRaw,
+      displayFull:(qtype==='forall'?'\u2200':'\u2203')+qv+'('+concRaw+')',
+      ast:null, err:null};
+  }
+
+  // There is a guard expression: "x >= 0", ">= 0", "x in [0,1]", etc.
+  // Normalize the guard (replace >=, <=, spaces around ops, etc.)
+  var guardNorm = normalizeGuard(guardRaw, qv);
+  return {name:name, type:qtype, quantVar:qv,
+    guardType:'cond', guardTemplate:guardNorm, concTemplate:concRaw,
+    raw:(qtype==='forall'?'\u2200':'\u2203')+qv+'('+guardNorm+(qtype==='forall'?' \u2192 ':' \u2227 ')+concRaw+')',
+    displayFull:(qtype==='forall'?'\u2200':'\u2203')+qv+'('+guardNorm+(qtype==='forall'?' \u2192 ':' \u2227 ')+concRaw+')',
+    ast:null, err:null};
+}
+
+// Find index of first top-level comma (not inside parens/brackets)
+function findTopLevelComma(s) {
+  var depth=0;
+  for (var i=0;i<s.length;i++){
+    if(s[i]==='('||s[i]==='[')depth++;
+    else if(s[i]===')'||s[i]===']')depth--;
+    else if(s[i]===','&&depth===0)return i;
+  }
+  return -1;
+}
+
+// Normalize a guard condition — collapse spaces around relops, handle Turkish etc.
+function normalizeGuard(raw, qv) {
+  var s = raw;
+  // Collapse spaces around relation operators: "x >= 0" → "x>=0"
+  s = s.replace(/\s*([><≥≤≠=!]+|>=|<=)\s*/g, function(m, op){ return op; });
+  // "x >= 0" after collapse: "x>=0" — but also handle prefix: ">= 0" → qv+">=0"
+  // If guard doesn't contain the variable, prepend it: ">= 0" → "x>=0"
+  var re = new RegExp('\\b' + escapeRegex(qv) + '\\b');
+  if (!re.test(s)) {
+    // Prefix operators like ">= 0": prepend variable
+    s = qv + s;
+  }
+  return s;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -284,19 +401,22 @@ function parseEditorText(raw) {
       continue;
     }
 
-    // Axiom: Name: formula  (Name can be A1, Aksiyom1, etc.)
+    // Axiom: Name: formula
     var axMatch = line.match(/^([A-Za-zÇçĞğİıÖöŞşÜü][A-Za-z0-9ÇçĞğİıÖöŞşÜü_]*)\s*:\s*(.+)$/);
     if (axMatch) {
-      axioms.push({name: axMatch[1], raw: normLine(axMatch[2].trim()), ast: null, err: null});
+      var axObj = detectQuantifier(axMatch[1], axMatch[2].trim());
+      axioms.push(axObj);
       continue;
     }
 
-    // Bare formula (treated as unnamed hypothesis)
-    axioms.push({name: 'H'+(axioms.length+1), raw: normLine(line), ast: null, err: null});
+    // Bare line — may be a quantifier or a regular formula
+    var bareObj = detectQuantifier('H'+(axioms.length+1), line);
+    axioms.push(bareObj);
   }
 
-  // Parse formulas
+  // Parse regular formulas (skip quantified axioms — they instantiate later)
   axioms.forEach(function(ax) {
+    if (ax.type === 'forall' || ax.type === 'exists') return; // handled by instantiateQuantifiers
     try { ax.ast = parseFormula(ax.raw); }
     catch(e) { ax.err = e.message; }
   });
@@ -310,8 +430,265 @@ function parseEditorText(raw) {
 }
 
 // ═══════════════════════════════════════════════════════
-// 3. FORMULA PARSER
+// 2b. QUANTIFIER INSTANTIATION
 // ═══════════════════════════════════════════════════════
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// ─── Ground term substitution ───
+function substVar(template, varName, term) {
+  try {
+    return template.replace(new RegExp('\\b' + escapeRegex(varName) + '\\b', 'g'), term);
+  } catch(e) {
+    return template.split(varName).join(term);
+  }
+}
+
+// ─── Numeric comparison evaluator ───
+// Parses strings like "5>=0", "a≤10" (after equality substitution) and evaluates them.
+var REL_OPS = [['>=',function(a,b){return a>=b;}],['<=',function(a,b){return a<=b;}],
+               ['≥', function(a,b){return a>=b;}],['≤', function(a,b){return a<=b;}],
+               ['!=',function(a,b){return a!==b;}],['≠', function(a,b){return a!==b;}],
+               ['>', function(a,b){return a>b;}], ['<', function(a,b){return a<b;}],
+               ['=', function(a,b){return a===b;}]];
+
+function evalNumericCond(expr) {
+  // Try each operator, longest first to avoid ambiguity
+  for (var i=0;i<REL_OPS.length;i++){
+    var op=REL_OPS[i][0], fn=REL_OPS[i][1];
+    var idx=expr.indexOf(op);
+    if(idx<0)continue;
+    var lhs=expr.slice(0,idx).trim(), rhs=expr.slice(idx+op.length).trim();
+    var ln=parseFloat(lhs), rn=parseFloat(rhs);
+    if(!isNaN(ln)&&!isNaN(rn)) return fn(ln,rn)?'true':'false';
+  }
+  return 'unknown';
+}
+
+// ─── Apply equality chain to an expression ───
+// equalities: Map of name→value (string), one-directional (variable→literal)
+function applyEqualities(expr, equalities, qv, term) {
+  // First substitute the quantifier variable with the candidate term
+  var s = substVar(expr, qv, term);
+  // Then apply equalities exactly once per key, in a single pass (no loop)
+  // so that "a→5" replaces a with 5 and never cycles back
+  equalities.forEach(function(val, key){
+    try {
+      var re = new RegExp('\\b' + escapeRegex(key) + '\\b', 'g');
+      s = s.replace(re, val);
+    } catch(e){}
+  });
+  return s;
+}
+
+// ─── Collect ground facts from axioms ───
+function collectGroundFacts(axioms) {
+  var memberships = []; // {term, domain, srcName}
+  var equalities  = new Map(); // variable → literal value (one-directional)
+  var allTerms    = new Set(); // all named ground terms
+
+  axioms.forEach(function(ax){
+    if(ax.type)return; // skip quantifiers
+    if(!ax.ast)return;
+
+    // Walk AST collecting all atom names as potential terms
+    (function gather(n){
+      if(!n)return;
+      if(n.type==='var'){
+        var nm=n.name;
+        allTerms.add(nm);
+
+        // Membership: t∈SET  (atom name contains ∈ after normalization)
+        var memM=nm.match(/^(.+)\u2208(.+)$/);
+        if(memM) memberships.push({term:memM[1].trim(), domain:memM[2].trim(), srcName:ax.name});
+
+        // Equality: "a=5" — store as variable→literal (one direction only)
+        // Heuristic: if lhs is a non-numeric identifier and rhs is numeric, lhs is the variable
+        var eqM=nm.match(/^([A-Za-z_\u00C0-\u024F][A-Za-z0-9_\u00C0-\u024F]*)=(.+)$/);
+        if(eqM){
+          var lhs=eqM[1].trim(), rhs=eqM[2].trim();
+          if(lhs&&rhs){
+            equalities.set(lhs, rhs);
+            // Add both sides as candidate terms
+            allTerms.add(lhs);
+            allTerms.add(rhs);
+          }
+        }
+        // Also handle "5=a" form (reversed): rhs is the variable
+        var eqM2=nm.match(/^([0-9][^=]*)=([A-Za-z_\u00C0-\u024F][A-Za-z0-9_\u00C0-\u024F]*)$/);
+        if(eqM2){
+          var lhs2=eqM2[2].trim(), rhs2=eqM2[1].trim();
+          if(lhs2&&rhs2){
+            equalities.set(lhs2, rhs2);
+            allTerms.add(lhs2); allTerms.add(rhs2);
+          }
+        }
+      }
+      gather(n.left);gather(n.right);gather(n.value);
+    })(ax.ast);
+  });
+
+  return {memberships:memberships, equalities:equalities, allTerms:allTerms};
+}
+
+// ─── Evaluate whether guard holds for a term ───
+// Returns 'true' | 'false' | 'unknown'
+function evalGuard(guardTemplate, qv, term, equalities, memberships) {
+  if(!guardTemplate) return 'true'; // no guard → always holds
+
+  // Apply equalities and substitute variable
+  var expr = applyEqualities(guardTemplate, equalities, qv, term);
+
+  // Membership guard: "t∈SET"
+  var memM=expr.match(/^(.+)\u2208(.+)$/);
+  if(memM){
+    var t2=memM[1].trim(), dom=memM[2].trim();
+    var found=memberships.some(function(mb){return mb.term===t2&&mb.domain===dom;});
+    return found?'true':'unknown';
+  }
+
+  // Try numeric evaluation
+  return evalNumericCond(expr);
+}
+
+// ─── Main instantiation ───
+function instantiateQuantifiers(axioms) {
+  var instances = [];
+  var gf = collectGroundFacts(axioms);
+
+  axioms.forEach(function(ax){
+    if(ax.type!=='forall'&&ax.type!=='exists') return;
+
+    var candidates = []; // {term, src}
+
+    if(ax.guardType==='member'){
+      // Domain guard: look for t∈domain membership facts
+      gf.memberships.forEach(function(mb){
+        if(mb.domain===ax.domain)
+          candidates.push({term:mb.term, src:mb.srcName, guardsOk:true});
+      });
+
+    } else if(ax.guardType==='cond'){
+      // Conditional guard: try all known terms, evaluate guard
+      gf.allTerms.forEach(function(t){
+        if(t===ax.quantVar) return;
+        var res=evalGuard(ax.guardTemplate, ax.quantVar, t, gf.equalities, gf.memberships);
+        if(res==='true') candidates.push({term:t, src:'('+(ax.guardTemplate)+' sağlandı)', guardsOk:true});
+        // 'unknown' → skip (can't verify); 'false' → skip
+      });
+
+    } else {
+      // No guard: use all known terms
+      gf.allTerms.forEach(function(t){
+        if(t!==ax.quantVar) candidates.push({term:t, src:'(genel)', guardsOk:true});
+      });
+    }
+
+    // Existential with no candidates → introduce witness
+    if(ax.type==='exists'&&candidates.length===0){
+      candidates.push({term:'_w_'+ax.quantVar, src:'(varoluş tanığı)', guardsOk:true});
+    }
+
+    candidates.forEach(function(c){
+      // Substitute variable in conclusion template
+      var concInst = substVar(ax.concTemplate, ax.quantVar, c.term);
+      var normConc = normalizeFormula(concInst);
+      var instAst=null, instErr=null;
+      try{ instAst=parseFormula(normConc); }
+      catch(e){ instErr=e.message; }
+
+      instances.push({
+        name: ax.name+'['+c.term+']',
+        type: 'instance',
+        raw: normConc,
+        derivedFrom: ax.name,
+        quantType: ax.type,
+        term: c.term,
+        src: c.src,
+        ast: instAst,
+        err: instErr
+      });
+    });
+  });
+
+  return instances;
+}
+
+// ═══════════════════════════════════════════════════════
+// 2c. NUMERIC FACT COMPUTATION
+// ═══════════════════════════════════════════════════════
+// After collecting equalities, walk every atom in the goal (and axioms)
+// that contains a comparison operator. Apply equality substitution,
+// evaluate numerically, and if true → add as a synthetic axiom so the
+// proof engines can use it.
+
+function computeNumericFacts(axioms, goal) {
+  var gf = collectGroundFacts(axioms);
+  var numFacts = []; // array of {name, raw, ast}
+  var seenAtoms = new Set();
+
+  // Gather all atoms from all ASTs (axioms + goal)
+  var allAsts = [];
+  axioms.forEach(function(ax){ if(!ax.type && ax.ast) allAsts.push(ax.ast); });
+  if(goal) allAsts.push(goal);
+
+  function gatherAtoms(n){
+    if(!n) return;
+    if(n.type==='var'){ seenAtoms.add(n.name); }
+    gatherAtoms(n.left); gatherAtoms(n.right); gatherAtoms(n.value);
+  }
+  allAsts.forEach(gatherAtoms);
+
+  // Also include all terms known from equalities
+  gf.equalities.forEach(function(val, key){ seenAtoms.add(key); seenAtoms.add(val); });
+
+  // For each atom that looks like a comparison (contains >, <, ≥, ≤, ≠, =)
+  // and isn't itself an equality assignment (handled separately),
+  // try to evaluate it after substituting equalities.
+  var REL_PATTERN = /[><≥≤≠]|[^=!<>]=[^=]/;
+
+  seenAtoms.forEach(function(atom){
+    if(!atom) return;
+    // Skip bare equality assignments like "a=5" (those are already used as equalities)
+    if(atom.match(/^[A-Za-z_][A-Za-z0-9_]*=[^=]/)) return;
+
+    // Apply equality substitutions to the atom
+    var substituted = atom;
+    gf.equalities.forEach(function(val, key){
+      try {
+        var re = new RegExp('\\b' + escapeRegex(key) + '\\b', 'g');
+        substituted = substituted.replace(re, val);
+      } catch(e){}
+    });
+
+    // If nothing changed and already numeric, or if it still has variables, try to evaluate
+    var result = evalNumericCond(substituted);
+    if(result === 'true'){
+      // The original atom is provably true under the current equalities
+      var normAtom = normalizeFormula(atom);
+      var ast = null;
+      try { ast = parseFormula(normAtom); } catch(e){}
+      if(ast && ast.type === 'var'){
+        // Only add if not already an axiom
+        var alreadyKnown = axioms.some(function(ax){ return !ax.type && ax.raw === normAtom; });
+        if(!alreadyKnown){
+          numFacts.push({
+            name: 'Hesap['+atom+']',
+            type: 'computed',
+            raw: normAtom,
+            derivedFrom: substituted,
+            ast: ast,
+            err: null
+          });
+        }
+      }
+    }
+  });
+
+  return numFacts;
+}
 
 function tokenize(src) {
   var i = 0, toks = [];
@@ -978,16 +1355,31 @@ function updatePreview(){
     el.innerHTML='<div class="preview-label">Önizleme</div><div style="font-family:var(--mono);font-size:.68rem;color:var(--text3)">—</div>';
     return;
   }
+  // Instantiate to show in preview
+  var instances = instantiateQuantifiers(parsed.axioms);
+
   var h='<div class="preview-label">Önizleme</div>';
   parsed.axioms.forEach(function(ax){
-    h+='<div class="preview-line"><span class="ax-name">'+esc(ax.name)+':</span> ';
-    if(ax.err) h+='<span class="err-inline">⚠ '+esc(ax.err)+'</span>';
-    else h+='<span class="formula">'+esc(ax.raw)+'</span>';
-    h+='</div>';
+    if (ax.type === 'forall' || ax.type === 'exists') {
+      var sym = ax.type === 'forall' ? '\u2200' : '\u2203';
+      h+='<div class="preview-line"><span class="ax-quant">'+esc(ax.name)+':</span> '
+        +'<span class="formula">'+esc(ax.raw)+'</span>'
+        +'<span class="q-tag">['+sym+(ax.domain?'\u2208'+esc(ax.domain):'')+']</span></div>';
+      // Show its instances
+      instances.filter(function(inst){return inst.derivedFrom===ax.name;}).forEach(function(inst){
+        h+='<div class="preview-inst"><span class="inst-name">'+esc(inst.name)+'</span>: '
+          +(inst.err?'<span style="color:var(--accent)">'+esc(inst.err)+'</span>':esc(inst.raw))+'</div>';
+      });
+    } else {
+      h+='<div class="preview-line"><span class="ax-name">'+esc(ax.name)+':</span> ';
+      if(ax.err) h+='<span class="err-inline">\u26a0 '+esc(ax.err)+'</span>';
+      else h+='<span class="formula">'+esc(ax.raw)+'</span>';
+      h+='</div>';
+    }
   });
   if(parsed.goal){
-    h+='<div class="preview-line"><span class="goal-mark">⊢</span> ';
-    if(parsed.goal.err) h+='<span class="err-inline">⚠ '+esc(parsed.goal.err)+'</span>';
+    h+='<div class="preview-line"><span class="goal-mark">\u22a2</span> ';
+    if(parsed.goal.err) h+='<span class="err-inline">\u26a0 '+esc(parsed.goal.err)+'</span>';
     else h+='<span class="formula">'+esc(parsed.goal.raw)+'</span>';
     h+='</div>';
   }
@@ -1008,11 +1400,13 @@ function runProve(){
   var parsed = parseEditorText(raw);
   var out = document.getElementById('proof-out');
 
-  // Validate
+  // Validate regular axioms
   var errors = [];
-  parsed.axioms.forEach(function(ax){ if(ax.err) errors.push(ax.name+': '+ax.err); });
+  parsed.axioms.forEach(function(ax){
+    if (!ax.type && ax.err) errors.push(ax.name+': '+ax.err);
+  });
   if(parsed.goal && parsed.goal.err) errors.push('Hedef: '+parsed.goal.err);
-  if(!parsed.goal) errors.push('Hedef belirtilmedi. "|- formül" veya "⊢ formül" şeklinde yazın.');
+  if(!parsed.goal) errors.push('Hedef belirtilmedi. "|- formül" veya "\u22a2 formül" şeklinde yazın.');
 
   if(errors.length){
     out.innerHTML='<div class="err-block">'+errors.map(esc).join('<br>')+'</div>';
@@ -1022,8 +1416,19 @@ function runProve(){
   out.innerHTML='<div class="waiting">Hesaplanıyor…</div>';
 
   setTimeout(function(){
-    var hyps = parsed.axioms.filter(function(ax){return ax.ast;}).map(function(ax){return ax.ast;});
-    var axNames = parsed.axioms.map(function(ax){return ax.name;});
+    // ── Instantiate quantifiers ──
+    var instances = instantiateQuantifiers(parsed.axioms);
+
+    // ── Compute numeric facts from equalities ──
+    var numFacts = computeNumericFacts(parsed.axioms, parsed.goal.ast);
+
+    // All effective hypotheses = regular axioms + valid instances + computed numeric facts
+    var regularAxioms = parsed.axioms.filter(function(ax){ return !ax.type && ax.ast; });
+    var validInstances = instances.filter(function(inst){ return inst.ast && !inst.err; });
+    var allEffective = regularAxioms.concat(validInstances).concat(numFacts);
+
+    var hyps = allEffective.map(function(ax){ return ax.ast; });
+    var axNames = allEffective.map(function(ax){ return ax.name; });
     var goal = parsed.goal.ast;
     var goalStr = ps(goal);
 
@@ -1034,7 +1439,6 @@ function runProve(){
     try{ ndSteps = ndProve(hyps, goal); }catch(e){}
     try{ resSteps = resolutionProve(hyps, goal); }catch(e){}
 
-    // Tableau for validity check
     var tabForms = hyps.concat([neg(goal)]);
     var tabClosed=false;
     try{
@@ -1046,13 +1450,57 @@ function runProve(){
     var proved = !!(ndSteps || resSteps || tabClosed);
 
     // ── Verdict ──
-    var hypStrsDisplay = parsed.axioms.map(function(ax){return ax.name+': '+esc(ax.raw);}).join(' &nbsp;·&nbsp; ');
+    var axDisplay = parsed.axioms.map(function(ax){
+      return ax.type ? esc(ax.raw) : esc(ax.raw||'');
+    }).join(', ');
     h+='<div class="verdict '+(proved?'verdict-ok':'verdict-fail')+'">'
-      +'<span class="verdict-icon">'+(proved?'✓':'✗')+'</span>'
+      +'<span class="verdict-icon">'+(proved?'\u2713':'\u2717')+'</span>'
       +'<span>'+(proved?'Kanıtlandı':'Kanıtlanamıyor')
-      +'<span class="verdict-seq">&ensp;{'
-      +parsed.axioms.map(function(ax){return esc(ax.raw);}).join(', ')+'} ⊢ '+esc(goalStr)+'</span>'
+      +'<span class="verdict-seq">&ensp;{'+axDisplay+'} \u22a2 '+esc(goalStr)+'</span>'
       +'</span></div>';
+
+    // ── Show quantified axioms and instances ──
+    var quantAxioms = parsed.axioms.filter(function(ax){ return ax.type === 'forall' || ax.type === 'exists'; });
+    var hasExtras = quantAxioms.length > 0 || numFacts.length > 0;
+    if (hasExtras) {
+      h+='<div class="sec-h">Türetilen Önermeler</div>';
+      h+='<div class="inst-block">';
+
+      if (quantAxioms.length > 0) {
+        h+='<div class="inst-head">Niceleyici aksiyomlarından örnekleme</div>';
+        quantAxioms.forEach(function(ax){
+          var axInstances = instances.filter(function(i){ return i.derivedFrom === ax.name; });
+          h+='<div style="font-family:var(--mono);font-size:.7rem;color:var(--pur);margin-bottom:.2rem">'
+            +esc(ax.name)+': <span style="color:var(--text)">'+esc(ax.displayFull||ax.raw)+'</span></div>';
+          if (!axInstances.length) {
+            h+='<div style="font-family:var(--mono);font-size:.67rem;color:var(--text3);margin-bottom:.4rem;padding-left:.6rem">'
+              +'Örnekleme için uygun terim bulunamadı.'+(ax.domain?' '+esc(ax.domain)+' kümesinde üyelik aksiyomu ekleyin.':'')+'</div>';
+          }
+          axInstances.forEach(function(inst){
+            h+='<div class="inst-row">'
+              +'<span class="ir-name">'+esc(inst.name)+'</span>'
+              +'<span class="ir-f">'+(inst.err?'<span style="color:var(--accent)">\u26a0 '+esc(inst.err)+'</span>':esc(inst.raw))+'</span>'
+              +'<span class="ir-src">'+esc(inst.src)+'\'dan</span>'
+              +'</div>';
+          });
+          h+='<div style="height:.3rem"></div>';
+        });
+      }
+
+      if (numFacts.length > 0) {
+        if (quantAxioms.length > 0) h+='<div style="height:.35rem;border-top:1px solid var(--border);margin:.4rem 0"></div>';
+        h+='<div class="inst-head">Eşitlik &amp; sayısal değerlendirme</div>';
+        numFacts.forEach(function(f){
+          h+='<div class="inst-row">'
+            +'<span class="ir-name">'+esc(f.name)+'</span>'
+            +'<span class="ir-f">'+esc(f.raw)+'</span>'
+            +'<span class="ir-src">'+esc(f.derivedFrom)+' → doğru</span>'
+            +'</div>';
+        });
+      }
+
+      h+='</div>';
+    }
 
     // ── Proof Steps ──
     h+='<div class="sec-h">Kanıt Adımları — Doğal Çıkarım</div>';
@@ -1083,10 +1531,11 @@ function runProve(){
 (function(){
   var inp = document.getElementById('main-input');
   inp.value = [
-    '// Hipotetik Silogizm',
-    'A1: P => Q',
-    'A2: Q => R',
-    '|- P => R'
+    '// Koşullu Niceleyici Örneği',
+    '// ∀x(x≥0 → x∈N) ve a=5 ise a∈N',
+    'her x >= 0, x elemanıdır N',
+    'a = 5',
+    '|- a elemanıdır N'
   ].join('\n');
   updatePreview();
 })();
