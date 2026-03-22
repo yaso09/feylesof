@@ -3,910 +3,1093 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Feylesof · Mantık Analiz</title>
-<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<title>Feylesof · Teorem Kanıtlayıcı</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#fafaf8;--bg2:#f0ede6;--text:#1a1814;--text2:#6c6760;
-  --accent:#7a1f1f;--green:#1a5c2a;--border:#d4cfc7;
-  --blue:#1a4c8b;--blue-bg:#f0f4ff;--blue-bd:#a0b8d8;
+  --bg:#fafaf8;--bg2:#f0ede6;--bg3:#e8e4dc;
+  --text:#1a1814;--text2:#6c6760;--text3:#9a9490;
+  --accent:#7a1f1f;--green:#1a5c2a;--border:#d4cfc7;--border2:#c4bfb6;
+  --blue:#1a4c8b;--blue-bg:#eef4ff;
   --red-bg:#fff8f8;--red-bd:#c4a0a0;
-  --grn-bg:#f5fff7;--grn-bd:#a0c4a8;
-  --pur:#5a1a7a;--pur-bg:#f8f0ff;--pur-bd:#c0a0d8;
-  --mono:'JetBrains Mono',monospace;--serif:'EB Garamond',Georgia,serif;
+  --grn-bg:#f4fff6;--grn-bd:#8cbfa0;
+  --pur:#5a1a7a;--pur-bg:#f8f0ff;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'EB Garamond',Georgia,serif;
 }
+
 body{font-family:var(--serif);background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
-header{border-bottom:2.5px solid var(--text);padding:1.3rem 2.4rem}
-header h1{font-size:1.95rem;font-weight:400}
-header h1 span{font-size:.71rem;color:var(--text2);display:block;font-family:var(--mono);margin-top:.2rem;letter-spacing:.9px;text-transform:uppercase}
-.app{display:grid;grid-template-columns:230px 1fr;flex:1}
 
-/* ── PALETTE ── */
-.pal{border-right:1.5px solid var(--border);padding:1.15rem .9rem;background:var(--bg2);overflow-y:auto}
-.pg{margin-bottom:1.4rem}
-.pgl{font-family:var(--mono);font-size:.61rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.4px;margin-bottom:.48rem;padding-bottom:.22rem;border-bottom:1px solid var(--border)}
-.toks{display:flex;flex-wrap:wrap;gap:.28rem}
-.tok{display:inline-flex;align-items:center;justify-content:center;padding:.28rem .55rem;font-family:var(--mono);font-size:.75rem;font-weight:600;border:1.5px solid var(--border);background:#fff;cursor:grab;user-select:none;transition:transform .1s,box-shadow .1s,border-color .15s;white-space:nowrap}
-.tok:hover{border-color:var(--text);transform:translateY(-1px);box-shadow:0 2px 6px rgba(0,0,0,.1)}
-.tok:active{cursor:grabbing}
-.tok.tv{color:var(--blue);border-color:var(--blue-bd);background:var(--blue-bg)}
-.tok.tu{color:var(--accent);border-color:var(--red-bd);background:var(--red-bg)}
-.tok.tb{color:var(--green);border-color:var(--grn-bd);background:var(--grn-bg)}
-.tok.tt{color:var(--pur);border-color:var(--pur-bd);background:var(--pur-bg)}
-.tok.dragging{opacity:.25;transform:scale(.92)}
-.tok.disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
-.cvar{width:100%;margin-top:.5rem;font-family:var(--mono);font-size:.75rem;padding:.28rem .48rem;border:1.5px solid var(--border);background:#fff;color:var(--text);outline:none;transition:border-color .15s}
-.cvar:focus{border-color:var(--text)}
-.cvar::placeholder{color:var(--text2)}
-.pal-hint{font-family:var(--mono);font-size:.64rem;color:var(--text2);line-height:2}
+/* ── HEADER ── */
+header{border-bottom:2.5px solid var(--text);padding:1rem 1.8rem;display:flex;align-items:baseline;gap:1.4rem;flex-shrink:0}
+.logo{font-size:1.65rem;font-weight:400;cursor:pointer;text-decoration:none;color:var(--text)}
+.logo em{font-style:italic;color:var(--accent)}
+.tagline{font-family:var(--mono);font-size:.6rem;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase}
 
-/* ── CANVAS ── */
-.cnv{overflow-y:auto;padding:1.55rem 1.9rem}
-.sec{margin-bottom:1.85rem}
-.sech{display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem}
-.secl{font-family:var(--mono);font-size:.61rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.4px}
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:380px 1fr;flex:1;min-height:0;overflow:hidden}
 
-/* ── PROP CARDS ── */
-.plist{display:flex;gap:.5rem;flex-wrap:wrap;align-items:stretch}
-.pc{border:1.5px solid var(--border);background:#fff;padding:.5rem .65rem;min-width:126px;max-width:185px;cursor:pointer;transition:border-color .15s,box-shadow .12s;flex-shrink:0}
-.pc:hover{border-color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.07)}
-.pc.active{border-color:var(--text);border-left:3px solid var(--text)}
-.pc.active.ok{border-left-color:var(--green)}
-.pct{display:flex;align-items:center;gap:.35rem;margin-bottom:.25rem}
-.pcn{font-family:var(--mono);font-size:.79rem;font-weight:600;flex:1;min-width:0}
-.pcok{font-size:.68rem;color:var(--green);font-family:var(--mono)}
-.pcf{font-family:var(--mono);font-size:.67rem;color:var(--text2);word-break:break-all;line-height:1.38;max-height:2.7em;overflow:hidden}
-.pcd{background:none;border:none;color:var(--text2);cursor:pointer;font-size:.86rem;padding:0;line-height:1;transition:color .12s;flex-shrink:0}
-.pcd:hover{color:var(--accent)}
-.pc-add{border:1.5px dashed var(--border);background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.16rem;padding:.62rem 1rem;cursor:pointer;font-family:var(--mono);font-size:.75rem;color:var(--text2);transition:all .15s;min-width:68px}
-.pc-add:hover{border-color:var(--text);color:var(--text);background:var(--bg2)}
-.pe{font-family:var(--mono);font-size:.78rem;color:var(--text2);font-style:italic;padding:.35rem 0}
+/* ── EDITOR PANEL ── */
+.editor-panel{border-right:1.5px solid var(--border);display:flex;flex-direction:column;overflow:hidden;background:var(--bg2)}
 
-/* ── EDITOR ── */
-.fbar{background:var(--bg2);border:1.5px solid var(--border);padding:.55rem .9rem;font-family:var(--mono);font-size:.88rem;min-height:2.5rem;margin-bottom:1rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
-.fbar .ph{color:var(--text2);font-size:.78rem}
-.fbar .wn{color:var(--accent);font-size:.68rem}
-.tw{min-height:62px;padding:.75rem;background:#fff;border:1.5px solid var(--border);margin-bottom:1rem;overflow-x:auto;display:flex;align-items:flex-start;flex-wrap:wrap;gap:.35rem}
-.slot{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:28px;border:1.5px dashed var(--border);font-family:var(--mono);font-size:.71rem;color:var(--text2);padding:.15rem .4rem;transition:border-color .15s,background .15s;vertical-align:middle}
-.slot.over{border-color:var(--text);background:var(--bg2);border-style:solid}
-.nv{display:inline-flex;align-items:center;gap:.25rem;border:1.5px solid var(--blue-bd);background:var(--blue-bg);padding:.16rem .5rem;font-family:var(--mono);font-size:.94rem;color:var(--blue);font-weight:700;vertical-align:middle}
-.nu,.nb{display:inline-flex;align-items:center;gap:.18rem;padding:.14rem .26rem;vertical-align:middle}
-.nu{border:1.5px solid var(--red-bd);background:var(--red-bg)}
-.nb{border:1.5px solid var(--grn-bd);background:var(--grn-bg)}
-.nb.nt{border-color:var(--pur-bd);background:var(--pur-bg)}
-.ops{font-family:var(--mono);font-size:.86rem;font-weight:700;padding:0 .18rem}
-.ops.u{color:var(--accent)}.ops.b{color:var(--green)}.ops.t{color:var(--pur)}
-.dl{display:inline-flex;align-items:center;justify-content:center;width:.98rem;height:.98rem;padding:0;margin-left:.14rem;background:transparent;border:1px solid var(--border);color:var(--text2);font-size:.59rem;cursor:pointer;line-height:1;transition:all .12s;flex-shrink:0}
-.dl:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.ep-top{padding:1rem 1.1rem .6rem;border-bottom:1px solid var(--border)}
+.ep-title{font-family:var(--mono);font-size:.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:.55rem}
 
-/* ── BUTTONS ── */
-.btn{background:var(--text);color:var(--bg);border:none;padding:.45rem 1.25rem;font-family:var(--mono);font-size:.7rem;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:background .15s}
-.btn:hover{background:var(--accent)}
-.btng{background:transparent;color:var(--text);border:1.5px solid var(--border);padding:.4rem .9rem;font-family:var(--mono);font-size:.7rem;cursor:pointer;transition:all .15s}
-.btng:hover{border-color:var(--text);background:var(--bg2)}
+.editor-wrap{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.editor-area{flex:1;min-height:0;display:flex;flex-direction:column}
+textarea#main-input{
+  flex:1;min-height:200px;resize:none;
+  font-family:var(--mono);font-size:.82rem;line-height:1.7;
+  padding:.85rem 1rem;border:none;outline:none;
+  background:#fff;color:var(--text);
+  border-bottom:1px solid var(--border);
+  tab-size:2;
+}
+textarea#main-input::placeholder{color:var(--text3)}
 
-/* ── ANALYSIS ── */
-.lbl{font-family:var(--mono);font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:.4rem}
-.chk-row{display:flex;align-items:center;gap:.42rem;padding:.2rem 0;font-family:var(--mono);font-size:.76rem}
-.nb2{display:inline-block;padding:.06rem .4rem;background:var(--bg2);border:1px solid var(--border);font-size:.68rem;font-weight:600;flex-shrink:0}
-.fml{color:var(--text2);font-size:.71rem}
-.arow{display:flex;align-items:flex-end;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem}
+.preview-wrap{padding:.7rem 1rem;background:var(--bg);border-bottom:1px solid var(--border);min-height:52px;max-height:180px;overflow-y:auto}
+.preview-label{font-family:var(--mono);font-size:.56rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.3px;margin-bottom:.38rem}
+.preview-line{font-family:var(--mono);font-size:.78rem;line-height:1.65;color:var(--text);margin:.05rem 0}
+.preview-line .ax-name{color:var(--pur);font-weight:600}
+.preview-line .goal-mark{color:var(--green);font-weight:600}
+.preview-line .formula{color:var(--text)}
+.preview-line .err-inline{color:var(--accent);font-size:.7rem}
+
+.prove-btn{
+  margin:.75rem 1.1rem;
+  background:var(--text);color:var(--bg);border:none;
+  padding:.7rem 1rem;font-family:var(--mono);font-size:.72rem;
+  letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;
+  transition:background .15s;
+}
+.prove-btn:hover{background:var(--green)}
+.prove-btn:active{background:var(--accent)}
+
+/* ── SYNTAX HELP ── */
+.syn-panel{padding:.75rem 1.1rem;border-top:1px solid var(--border);font-family:var(--mono);font-size:.65rem;color:var(--text2)}
+.syn-title{font-size:.56rem;text-transform:uppercase;letter-spacing:1.3px;color:var(--text3);margin-bottom:.5rem}
+.syn-table{display:grid;grid-template-columns:auto 1fr;gap:.22rem .7rem;align-items:baseline}
+.syn-table code{color:var(--accent);background:var(--bg3);padding:.03rem .32rem;font-size:.64rem}
+.syn-note{margin-top:.55rem;color:var(--text3);line-height:1.65;font-size:.62rem}
+
+/* ── OUTPUT PANEL ── */
+.output-panel{overflow-y:auto;padding:1.4rem 1.8rem}
+
+.waiting{font-family:var(--mono);font-size:.82rem;color:var(--text3);padding:2.5rem 0;font-style:italic}
+
+/* ── VERDICT ── */
+.verdict{display:flex;align-items:center;gap:.65rem;padding:.65rem 1rem;margin-bottom:1.1rem;border:1.5px solid;font-family:var(--mono);font-size:.82rem;font-weight:600}
+.verdict-ok{background:var(--grn-bg);border-color:var(--grn-bd);color:var(--green)}
+.verdict-fail{background:var(--red-bg);border-color:var(--red-bd);color:var(--accent)}
+.verdict-icon{font-size:1.05rem}
+.verdict-seq{font-weight:400;margin-left:.25rem}
+
+/* ── SECTION HEADING ── */
+.sec-h{font-family:var(--mono);font-size:.58rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);display:flex;align-items:center;gap:.6rem;margin:1.4rem 0 .7rem}
+.sec-h::before{content:'';width:.55rem;height:.55rem;background:var(--text3);transform:rotate(45deg);flex-shrink:0}
+.sec-h:first-child{margin-top:0}
+
+/* ── PROOF STEPS ── */
+.proof-block{background:#fff;border:1.5px solid var(--border);overflow:hidden;margin-bottom:1.2rem}
+.proof-header{font-family:var(--mono);font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:.45rem .85rem;background:var(--bg2);border-bottom:1px solid var(--border)}
+.proof-steps{padding:.6rem 0}
+.ps-step{display:grid;grid-template-columns:2rem 1fr auto;align-items:baseline;gap:.25rem;padding:.22rem .85rem;line-height:1.6;font-family:var(--mono);font-size:.8rem}
+.ps-step:hover{background:rgba(0,0,0,.022)}
+.ps-num{color:var(--text3);font-size:.6rem;text-align:right;user-select:none}
+.ps-f{color:var(--text)}
+.ps-f.hyp-f{color:var(--pur);font-style:italic}
+.ps-f.goal-f{color:var(--green);font-weight:600}
+.ps-rule{color:var(--text3);font-size:.59rem;text-align:right;white-space:nowrap;padding-left:.6rem}
+.ps-rule.hyp-rule{color:var(--pur)}
+.proof-divider{height:1px;background:var(--border);margin:.28rem .85rem}
+.proof-qed{padding:.42rem .85rem;font-family:var(--mono);font-size:.85rem;color:var(--green);text-align:right;border-top:1px solid var(--border)}
+.proof-fail{padding:.75rem .85rem;font-family:var(--mono);font-size:.75rem;color:var(--text3);font-style:italic}
+.subproof-open{border-left:2px solid var(--border);margin:.12rem 0 .12rem 2.2rem;padding-left:0}
 
 /* ── TRUTH TABLE ── */
-.tblw{overflow-x:auto;margin-bottom:.9rem}
-table.tt{border-collapse:collapse;font-family:var(--mono);font-size:.8rem;min-width:100%}
-table.tt th{border-bottom:2px solid var(--text);padding:.28rem .68rem;text-align:center;font-weight:600;background:var(--bg2);white-space:nowrap}
+.tbl-wrap{overflow-x:auto;margin-bottom:1.2rem}
+table.tt{border-collapse:collapse;font-family:var(--mono);font-size:.78rem;min-width:100%}
+table.tt th{border-bottom:2px solid var(--text);padding:.25rem .65rem;text-align:center;font-weight:600;background:var(--bg2);white-space:nowrap}
 table.tt th.sp{border-left:2.5px solid var(--text)}
-table.tt th.main-h{background:#e8e4dc}
-table.tt td{border-bottom:1px solid var(--border);padding:.22rem .68rem;text-align:center}
+table.tt th.gh{background:var(--bg3)}
+table.tt td{border-bottom:1px solid var(--border);padding:.2rem .65rem;text-align:center}
 table.tt td.sp{border-left:2.5px solid var(--text)}
-table.tt tr.rt td{background:#edf7f0}
-table.tt tr.rf td{background:#fef0ee}
+table.tt tr.r-ok td{background:#edf7f0}
+table.tt tr.r-ko td{background:#fff0ed}
 .vD{color:var(--green);font-weight:700}
 .vY{color:var(--accent);font-weight:700}
-
-/* ── RESULT CARDS ── */
-.rcards{display:flex;flex-direction:column;gap:.7rem}
-.rcard{border:1.5px solid var(--border);background:#fff;padding:.7rem .9rem}
-.rcard-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.45rem;font-family:var(--mono);font-size:.78rem;font-weight:600}
-.rcard-fml{font-family:var(--mono);font-size:.71rem;color:var(--text2);margin-bottom:.5rem;padding:.3rem .6rem;background:var(--bg2);border-left:2px solid var(--border)}
-.badge{display:inline-block;padding:.12rem .62rem;font-family:var(--mono);font-size:.67rem;border:1px solid}
-.b-tot{color:var(--green);border-color:var(--green);background:#e8f7ed}
-.b-cel{color:var(--accent);border-color:var(--accent);background:#fff0ed}
-.b-olu{color:var(--blue);border-color:var(--blue);background:#eef4ff}
-.b-ok{color:var(--green);border-color:var(--green);background:#e8f7ed}
-.b-no{color:var(--accent);border-color:var(--accent);background:#fff0ed}
-.rn{font-family:var(--mono);font-size:.72rem;color:var(--text2);line-height:1.7}
-.eq-card{border:1.5px solid var(--border);background:#fff;padding:.65rem .9rem}
-.eq-head{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;margin-bottom:.35rem;font-family:var(--mono);font-size:.77rem;font-weight:600}
-.eq-sym{font-size:1.1rem}
-.hint{font-family:var(--mono);font-size:.76rem;color:var(--text2);font-style:italic;padding:.35rem 0}
-.err{background:#fff0f0;border:1px solid var(--red-bd);color:var(--accent);padding:.48rem .8rem;font-family:var(--mono);font-size:.75rem;margin-top:.4rem}
-.legend{display:flex;flex-wrap:wrap;gap:.52rem;margin-bottom:.72rem;font-family:var(--mono);font-size:.67rem;color:var(--text2)}
-.li{display:flex;align-items:center;gap:.3rem}
-.ls{width:1rem;height:.68rem;border:1px solid rgba(0,0,0,.1)}
-.ls-t{background:#edf7f0}.ls-f{background:#fef0ee}
-.the-note{font-family:var(--mono);font-size:.68rem;color:var(--pur);padding:.3rem .6rem;background:var(--pur-bg);border:1px solid var(--pur-bd);margin-top:.5rem}
-/* multi-premise ∴ node */
-.the-node{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.22rem;padding:.14rem .32rem;border:1.5px solid var(--pur-bd);background:var(--pur-bg);vertical-align:middle}
-.the-prems{display:inline-flex;align-items:center;gap:.18rem;flex-wrap:wrap}
-.the-comma{font-family:var(--mono);font-size:.82rem;color:var(--text2);margin-right:.06rem}
-.the-add-btn{display:inline-flex;align-items:center;justify-content:center;width:1.15rem;height:1.15rem;font-family:var(--mono);font-size:.78rem;font-weight:700;background:transparent;border:1px dashed var(--pur-bd);color:var(--pur);cursor:pointer;line-height:1;flex-shrink:0;transition:all .12s}
-.the-add-btn:hover{background:var(--pur);color:#fff;border-style:solid}
-.the-dprem{display:inline-flex;align-items:center;justify-content:center;width:.88rem;height:.88rem;padding:0;margin-left:.08rem;background:transparent;border:1px solid var(--pur-bd);color:var(--pur);font-size:.56rem;cursor:pointer;line-height:1;transition:all .12s;flex-shrink:0}
-.the-dprem:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.res-banner{display:flex;align-items:center;gap:.6rem;padding:.55rem .9rem;margin-bottom:.65rem;font-family:var(--mono);font-size:.78rem;font-weight:600;border-width:1.5px;border-style:solid}
-.banner-ok{background:#e8f7ed;border-color:#8cbfa0;color:var(--green)}
-.banner-fail{background:#fff0ed;border-color:#c4a0a0;color:var(--accent)}
+.tt-note{font-family:var(--mono);font-size:.7rem;color:var(--text2);margin:.3rem 0 .8rem;line-height:1.65}
+.badge{display:inline-block;padding:.1rem .58rem;font-family:var(--mono);font-size:.64rem;border:1px solid}
+.b-tot{color:var(--green);border-color:var(--green);background:var(--grn-bg)}
+.b-cel{color:var(--accent);border-color:var(--accent);background:var(--red-bg)}
+.b-olu{color:var(--blue);border-color:var(--blue);background:var(--blue-bg)}
 
 /* ── TABLEAU ── */
-.chi-sep{border-top:1.5px dashed var(--border);margin:1.6rem 0 1.2rem}
-.tab-info{font-family:var(--mono);font-size:.67rem;color:var(--text2);padding:.38rem .68rem;background:var(--bg2);border:1px solid var(--border);margin-bottom:.85rem;line-height:1.7}
-.tab-wrap{overflow-x:auto;margin-top:.6rem;padding:1.2rem 1.5rem;background:#fff;border:1.5px solid var(--border);display:inline-block;min-width:0}
-
-/* tree nodes */
-.t-tree{display:flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:.81rem}
-.t-rows{display:flex;flex-direction:column;align-items:flex-start}
-.t-row{display:flex;align-items:baseline;gap:.4rem;padding:.2rem .3rem;line-height:1.58;white-space:nowrap}
-.t-rn{color:var(--text2);font-size:.62rem;min-width:1.5rem;text-align:right;flex-shrink:0;user-select:none}
+.tab-outer{overflow-x:auto;margin-bottom:1.2rem}
+.tab-wrap{display:inline-block;background:#fff;border:1.5px solid var(--border);padding:1rem 1.3rem}
+.t-tree{display:flex;flex-direction:column;align-items:center;font-family:var(--mono);font-size:.78rem}
+.t-row{display:flex;align-items:baseline;gap:.32rem;padding:.16rem .22rem;line-height:1.55;white-space:nowrap}
+.t-rn{color:var(--text3);font-size:.59rem;min-width:1.4rem;text-align:right;flex-shrink:0;user-select:none}
 .t-fm{color:var(--text)}
-.t-ck{color:var(--green);font-size:.7rem;margin-left:.1rem}
-.t-ref{color:var(--text3);font-size:.59rem;margin-left:.12rem}
-
-/* vertical connector trunk → fork */
-.t-vline{width:1.5px;background:var(--border);height:1.5rem;flex-shrink:0}
-
-/* horizontal fork bar + two branches */
+.t-ck{color:var(--green);font-size:.65rem;margin-left:.07rem}
+.t-ref{color:var(--text3);font-size:.56rem;margin-left:.07rem}
+.t-vl{width:1.5px;background:var(--border);height:1.3rem;flex-shrink:0}
 .t-split{display:flex;align-items:flex-start;border-top:1.5px solid var(--border)}
-.t-bl,.t-br{display:flex;flex-direction:column;align-items:center;padding:.55rem .9rem 0;min-width:5.5rem}
+.t-bl,.t-br{display:flex;flex-direction:column;align-items:center;padding:.45rem .78rem 0;min-width:4.5rem}
 .t-br{border-left:1.5px solid var(--border)}
+.t-x{color:var(--accent);font-family:var(--mono);font-size:.87rem;font-weight:700;padding:.3rem .3rem;text-align:center;border-top:1.5px solid var(--red-bd);margin-top:.07rem;width:100%}
+.t-o{color:var(--green);font-family:var(--mono);font-size:1.05rem;padding:.22rem .3rem;text-align:center;border-top:1.5px solid var(--grn-bd);margin-top:.07rem;width:100%}
+.tab-model{font-family:var(--mono);font-size:.65rem;color:var(--green);padding:.25rem .5rem;background:var(--grn-bg);border:1px solid var(--grn-bd);margin-top:.4rem;display:inline-flex;flex-wrap:wrap;gap:.38rem}
+.tab-info{font-family:var(--mono);font-size:.65rem;color:var(--text2);padding:.35rem .65rem;background:var(--bg2);border:1px solid var(--border);margin-bottom:.75rem;line-height:1.65}
 
-/* terminals */
-.t-closed{
-  color:var(--accent);font-family:var(--mono);font-size:.9rem;font-weight:700;
-  padding:.38rem .4rem;text-align:center;letter-spacing:.3px;
-  border-top:1.5px solid var(--red-bd);margin-top:.1rem;width:100%;
-}
-.t-open{
-  color:var(--green);font-family:var(--mono);font-size:1.15rem;
-  padding:.28rem .4rem;text-align:center;
-  border-top:1.5px solid var(--grn-bd);margin-top:.1rem;width:100%;
-}
+.err-block{background:var(--red-bg);border:1px solid var(--red-bd);color:var(--accent);padding:.45rem .8rem;font-family:var(--mono);font-size:.73rem;margin:.4rem 0}
+.note-block{font-family:var(--mono);font-size:.7rem;color:var(--text3);font-style:italic;padding:.25rem 0}
 
-/* open model */
-.tab-open-model{font-family:var(--mono);font-size:.67rem;color:var(--green);padding:.28rem .55rem;background:#e8f7ed;border:1px solid var(--grn-bd);margin-top:.45rem;display:inline-flex;flex-wrap:wrap;gap:.4rem}
-.tab-model-var{display:flex;gap:.15rem;align-items:center}
+@keyframes fi{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.fi{animation:fi .22s ease both}
 
-@keyframes fup{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.fi{animation:fup .22s ease both}
+/* scrollbar */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
 </head>
 <body>
+
 <header>
-  <h1><div style="cursor:pointer" onclick="window.location.href='/'">Feylesof</div>
-    <span>Önerme Oluşturucu · Tutarlılık · Geçerlilik · Eşdeğerlik · Çözümleyici Çizelge</span>
-  </h1>
+  <a class="logo" href="/">Feylesof · <em>Teorem Kanıtlayıcı</em></a>
+  <span class="tagline">Doğal Çıkarım · Analitik Çizelge · Doğruluk Tablosu</span>
 </header>
 
 <div class="app">
-  <!-- PALETTE -->
-  <aside class="pal">
-    <div class="pg">
-      <div class="pgl">Değişkenler</div>
-      <div class="toks" id="vt"></div>
-      <input class="cvar" id="cvar" type="text" placeholder="Özel (Enter)..." maxlength="5" autocomplete="off">
+
+  <!-- LEFT: EDITOR -->
+  <aside class="editor-panel">
+    <div class="ep-top">
+      <div class="ep-title">Aksiyomlar &amp; Hedef</div>
     </div>
-    <div class="pg">
-      <div class="pgl">Tekli</div>
-      <div class="toks">
-        <div class="tok tu" draggable="true" data-type="not">&#172; DEĞİL</div>
-      </div>
+
+    <div class="editor-area">
+      <textarea id="main-input" spellcheck="false"
+        placeholder="A1: P => Q&#10;A2: Q => R&#10;|-  P => R"></textarea>
     </div>
-    <div class="pg">
-      <div class="pgl">İkili</div>
-      <div class="toks">
-        <div class="tok tb" draggable="true" data-type="and">&#8743; VE</div>
-        <div class="tok tb" draggable="true" data-type="or">&#8744; VEYA</div>
-        <div class="tok tb" draggable="true" data-type="imp">&#8594; EGSART</div>
-        <div class="tok tb" draggable="true" data-type="iff">&#8596; DKSART</div>
-      </div>
+
+    <div class="preview-wrap" id="preview">
+      <div class="preview-label">Önizleme</div>
     </div>
-    <div class="pg">
-      <div class="pgl">Çıkarım</div>
-      <div class="toks">
-        <div class="tok tt" id="tok-the" draggable="true" data-type="the">&#8756; O HALDE</div>
+
+    <button class="prove-btn" onclick="runProve()">Kanıtla →</button>
+
+    <div class="syn-panel">
+      <div class="syn-title">Söz Dizimi</div>
+      <div class="syn-table">
+        <code>A1: P</code><span>P, aksiyom 1'dir</span>
+        <code>|- P</code><span>Kanıtlanacak hedef (⊢ P de olur)</span>
+        <code>p, q; r</code><span>p ve q'dan r çıkar</span>
+        <code>=></code><span>→ &nbsp;(ise / koşullu)</span>
+        <code>&lt;=></code><span>↔ &nbsp;(ancak ve ancak)</span>
+        <code>===</code><span>≡ &nbsp;(denk)</span>
+        <code>&amp;&amp;</code><span>∧ &nbsp;(ve)</span>
+        <code>||</code><span>∨ &nbsp;(veya)</span>
+        <code>~P</code><span>¬P (değil)</span>
+        <code>a >= b</code><span>a ≥ b</span>
+        <code>a <= b</code><span>a ≤ b</span>
+        <code>her x</code><span>∀x</span>
+        <code>bazı x</code><span>∃x</span>
+        <code>a elemanıdır B</code><span>a ∈ B</span>
       </div>
-      <div class="the-note">Yalnızca kök. Sol taraf: virgülle ayrılmış öncüller (+). Sağ taraf: sonuç.</div>
+      <div class="syn-note">
+        Atom adı serbesttir: x&gt;0, isPrime(n),<br>
+        n≥2, Sokrates_ölümlüdür, A₁ …<br>
+        // ile satır sonuna yorum eklenebilir.
+      </div>
     </div>
   </aside>
 
-  <!-- CANVAS -->
-  <main class="cnv">
-
-    <!-- PROPS LIST -->
-    <section class="sec">
-      <div class="sech"><span class="secl">Önermeler</span></div>
-      <div class="plist" id="plist"></div>
-    </section>
-
-    <!-- EDITOR -->
-    <section class="sec" id="sec-ed" style="display:none">
-      <div class="sech">
-        <span class="secl">Düzenleyici &mdash; <strong id="ed-lbl"></strong></span>
-        <button class="btng" onclick="clearAT()">Ağacı Temizle</button>
-      </div>
-      <div class="fbar" id="fbar"><span class="ph">Paletten bir blok sürükleyip &#8853; yuvasına bırakın...</span></div>
-      <div class="tw" id="tw"></div>
-    </section>
-
-    <!-- ANALYSIS -->
-    <section class="sec">
-      <div class="sech"><span class="secl">Analiz</span></div>
-      <div id="ana-sw"></div>
-      <div id="ana-res"></div>
-      <!-- TABLEAU SECTION -->
-      <div id="chi-sec" style="display:none">
-        <div class="chi-sep"></div>
-        <div class="sech"><span class="secl">Çözümleyici Çizelge</span></div>
-        <div id="chi-res"></div>
-      </div>
-    </section>
-
+  <!-- RIGHT: OUTPUT -->
+  <main class="output-panel">
+    <div id="proof-out">
+      <div class="waiting">Aksiyomları ve hedefi girin, ardından <strong>Kanıtla</strong>'ya tıklayın.</div>
+    </div>
   </main>
+
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// LOGIC CORE
-// ═══════════════════════════════════════════════
+'use strict';
 
-function ps(n){
-  if(!n)return'?';
-  switch(n.type){
-    case'var':return n.name;
-    case'not':return'\u00AC('+ps(n.value)+')';
-    case'and':return'('+ps(n.left)+'\u2227'+ps(n.right)+')';
-    case'or': return'('+ps(n.left)+'\u2228'+ps(n.right)+')';
-    case'imp':return'('+ps(n.left)+'\u2192'+ps(n.right)+')';
-    case'iff':return'('+ps(n.left)+'\u2194'+ps(n.right)+')';
-    case'the':return(n.premises||[]).map(ps).join(', ')+' \u2234 '+ps(n.conclusion||null);
-    default:return'?';
+// ═══════════════════════════════════════════════════════
+// 1. TEXT NORMALIZATION
+// ═══════════════════════════════════════════════════════
+
+function normalizeFormula(text) {
+  // Strip comments
+  text = text.replace(/\/\/.*$/gm, '');
+  // Multi-char first (order matters)
+  text = text.replace(/<==>/g, '↔');
+  text = text.replace(/<=>/g, '↔');
+  text = text.replace(/===/g, '≡');
+  text = text.replace(/=>/g, '→');
+  text = text.replace(/\|\|/g, '∨');
+  text = text.replace(/&&/g, '∧');
+  // ~ only when followed by non-space (negation, not in >=, <=)
+  text = text.replace(/~(?=\S)/g, '¬');
+  text = text.replace(/~(?=\s)/g, '¬');
+  // >= and <= (keep as atoms for math propositions)
+  text = text.replace(/>=/g, '≥');
+  text = text.replace(/<=/g, '≤');
+  // Turkish quantifiers
+  text = text.replace(/\bher\s+(\S+)/g, '∀$1');
+  text = text.replace(/\bbazı\s+(\S+)/g, '∃$1');
+  text = text.replace(/\b(\S+)\s+eleman[ıi]d[ıi]r\s+(\S+)/g, '$1∈$2');
+  return text.trim();
+}
+
+// Normalize a single line (for formula fields)
+function normLine(text) {
+  return normalizeFormula(text);
+}
+
+// ═══════════════════════════════════════════════════════
+// 2. INPUT PARSER (parse the editor text into axioms + goal)
+// ═══════════════════════════════════════════════════════
+
+function parseEditorText(raw) {
+  var axioms = [], goal = null;
+  var lines = raw.split('\n');
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    // Remove comments
+    line = line.replace(/\/\/.*$/, '').trim();
+    if (!line) continue;
+
+    // Semicolon notation: p, q; r
+    if (line.includes(';') && !line.match(/^[A-Za-zÇçĞğİıÖöŞşÜü]\w*\s*:/)) {
+      var parts = line.split(';');
+      var premStrs = parts[0].split(',').map(function(s){return normLine(s.trim());}).filter(Boolean);
+      var concStr = normLine(parts[1].trim());
+      premStrs.forEach(function(p, j) {
+        axioms.push({name: 'H'+(j+1), raw: p, ast: null, err: null});
+      });
+      goal = {raw: concStr, ast: null, err: null};
+      continue;
+    }
+
+    // Goal line: |- ... or ⊢ ... or kanıtla: ...
+    var goalMatch = line.match(/^(\|-|⊢|kanıtla\s*:)\s*(.+)$/i);
+    if (goalMatch) {
+      goal = {raw: normLine(goalMatch[2].trim()), ast: null, err: null};
+      continue;
+    }
+
+    // Axiom: Name: formula  (Name can be A1, Aksiyom1, etc.)
+    var axMatch = line.match(/^([A-Za-zÇçĞğİıÖöŞşÜü][A-Za-z0-9ÇçĞğİıÖöŞşÜü_]*)\s*:\s*(.+)$/);
+    if (axMatch) {
+      axioms.push({name: axMatch[1], raw: normLine(axMatch[2].trim()), ast: null, err: null});
+      continue;
+    }
+
+    // Bare formula (treated as unnamed hypothesis)
+    axioms.push({name: 'H'+(axioms.length+1), raw: normLine(line), ast: null, err: null});
+  }
+
+  // Parse formulas
+  axioms.forEach(function(ax) {
+    try { ax.ast = parseFormula(ax.raw); }
+    catch(e) { ax.err = e.message; }
+  });
+
+  if (goal) {
+    try { goal.ast = parseFormula(goal.raw); }
+    catch(e) { goal.err = e.message; }
+  }
+
+  return {axioms: axioms, goal: goal};
+}
+
+// ═══════════════════════════════════════════════════════
+// 3. FORMULA PARSER
+// ═══════════════════════════════════════════════════════
+
+function tokenize(src) {
+  var i = 0, toks = [];
+  while (i < src.length) {
+    if (/\s/.test(src[i])) { i++; continue; }
+    // Two/three-char operators (after normalization we mostly have Unicode)
+    if (src[i] === '↔') { toks.push({t:'iff'}); i++; continue; }
+    if (src[i] === '→') { toks.push({t:'imp'}); i++; continue; }
+    if (src[i] === '≡') { toks.push({t:'iff'}); i++; continue; } // treat ≡ as ↔
+    if (src[i] === '∧') { toks.push({t:'and'}); i++; continue; }
+    if (src[i] === '∨') { toks.push({t:'or'});  i++; continue; }
+    if (src[i] === '¬') { toks.push({t:'not'}); i++; continue; }
+    if (src[i] === '(') { toks.push({t:'lp'});  i++; continue; }
+    if (src[i] === ')') { toks.push({t:'rp'});  i++; continue; }
+    // Fallback: identifier (everything else until whitespace/parens/operators)
+    var j = i;
+    while (j < src.length && !/[\s()↔→≡∧∨¬]/.test(src[j])) j++;
+    if (j > i) { toks.push({t:'id', v:src.slice(i,j)}); i = j; continue; }
+    throw new Error('Tanınmayan karakter: "' + src[i] + '"');
+  }
+  return toks;
+}
+
+function parseFormula(str) {
+  if (!str || !str.trim()) throw new Error('Boş formül');
+  // First normalize
+  str = normLine(str);
+  var toks = tokenize(str), p = 0;
+  function cur() { return toks[p] || null; }
+  function eat(t) {
+    if (!cur() || cur().t !== t)
+      throw new Error('Beklenen "' + t + '", bulunan ' + (cur() ? '"'+cur().t+'"' : 'son'));
+    return toks[p++];
+  }
+  function pBi()  { var l=pIm(); if(cur()&&cur().t==='iff'){p++;var r=pBi();return{type:'iff',left:l,right:r};}return l; }
+  function pIm()  { var l=pOr(); if(cur()&&cur().t==='imp'){p++;var r=pIm();return{type:'imp',left:l,right:r};}return l; }
+  function pOr()  { var l=pAnd(); while(cur()&&cur().t==='or' ){p++;var r=pAnd();l={type:'or', left:l,right:r};}return l; }
+  function pAnd() { var l=pNot(); while(cur()&&cur().t==='and'){p++;var r=pNot();l={type:'and',left:l,right:r};}return l; }
+  function pNot() { if(cur()&&cur().t==='not'){p++;return{type:'not',value:pNot()};}return pAtom(); }
+  function pAtom(){
+    var t=cur();
+    if(!t) throw new Error('Beklenmedik formül sonu');
+    if(t.t==='lp'){p++;var f=pBi();eat('rp');return f;}
+    if(t.t==='id'){p++;return{type:'var',name:t.v};}
+    throw new Error('Beklenmedik: "' + t.t + '"');
+  }
+  var res = pBi();
+  if (p < toks.length) throw new Error('Fazla simge: "' + toks[p].t + '"');
+  return res;
+}
+
+// ═══════════════════════════════════════════════════════
+// 4. LOGIC CORE
+// ═══════════════════════════════════════════════════════
+
+function ps(n) {
+  if (!n) return '?';
+  switch (n.type) {
+    case 'var': return n.name;
+    case 'not': return '¬(' + ps(n.value) + ')';
+    case 'and': return '(' + ps(n.left) + '∧' + ps(n.right) + ')';
+    case 'or':  return '(' + ps(n.left) + '∨' + ps(n.right) + ')';
+    case 'imp': return '(' + ps(n.left) + '→' + ps(n.right) + ')';
+    case 'iff': return '(' + ps(n.left) + '↔' + ps(n.right) + ')';
+    default: return '?';
   }
 }
 
-function isOk(n){
-  if(!n)return false;
-  if(n.type==='var')return true;
-  if(n.type==='not')return isOk(n.value);
-  if(n.type==='the')return n.premises.length>0&&n.premises.every(isOk)&&isOk(n.conclusion);
-  return isOk(n.left)&&isOk(n.right);
-}
+function neg(n) { return {type:'not', value:n}; }
+function eqs(a,b) { return ps(a) === ps(b); }
 
-function ev(n,v){
-  switch(n.type){
-    case'var':return!!v[n.name];
-    case'not':return!ev(n.value,v);
-    case'and':return ev(n.left,v)&&ev(n.right,v);
-    case'or': return ev(n.left,v)||ev(n.right,v);
-    case'imp':return!ev(n.left,v)||ev(n.right,v);
-    case'iff':return ev(n.left,v)===ev(n.right,v);
-    case'the':{
-      // (p1 ∧ p2 ∧ ...) → conclusion
-      var premTrue=n.premises.every(function(p){return ev(p,v);});
-      return!premTrue||ev(n.conclusion,v);
-    }
+function ev(n, v) {
+  switch (n.type) {
+    case 'var': return !!v[n.name];
+    case 'not': return !ev(n.value, v);
+    case 'and': return ev(n.left,v) && ev(n.right,v);
+    case 'or':  return ev(n.left,v) || ev(n.right,v);
+    case 'imp': return !ev(n.left,v) || ev(n.right,v);
+    case 'iff': return ev(n.left,v) === ev(n.right,v);
   }
   return false;
 }
 
-function cvars(n,s){
-  if(!s)s=new Set();if(!n)return s;
-  if(n.type==='var')s.add(n.name);
-  else if(n.type==='the'){
-    (n.premises||[]).forEach(function(p){cvars(p,s);});
-    cvars(n.conclusion,s);
-  } else{cvars(n.left,s);cvars(n.right,s);cvars(n.value,s);}
+function cvars(n, s) {
+  if (!s) s = new Set();
+  if (!n) return s;
+  if (n.type === 'var') s.add(n.name);
+  else { cvars(n.left,s); cvars(n.right,s); cvars(n.value,s); }
   return s;
 }
 
-function dep(n){
-  if(!n||n.type==='var')return 0;
-  if(n.type==='not')return 1+dep(n.value);
-  if(n.type==='the'){
-    var mx=dep(n.conclusion)||0;
-    (n.premises||[]).forEach(function(p){mx=Math.max(mx,dep(p)||0);});
-    return 1+mx;
-  }
-  return 1+Math.max(dep(n.left)||0,dep(n.right)||0);
+function dep(n) {
+  if (!n || n.type==='var') return 0;
+  if (n.type==='not') return 1 + dep(n.value);
+  return 1 + Math.max(dep(n.left)||0, dep(n.right)||0);
 }
 
-function allSubs(n,l,se){
-  if(!l)l=[];if(!se)se=new Set();if(!n)return l;
-  var s=ps(n);if(!se.has(s)){se.add(s);l.push(n);}
-  if(n.type==='the'){
-    (n.premises||[]).forEach(function(p){allSubs(p,l,se);});
-    allSubs(n.conclusion,l,se);
-  } else {
-    if(n.left)allSubs(n.left,l,se);if(n.right)allSubs(n.right,l,se);if(n.value)allSubs(n.value,l,se);
-  }
+function allSubs(n, l, se) {
+  if (!l) l=[]; if (!se) se=new Set(); if (!n) return l;
+  var s=ps(n); if (!se.has(s)) { se.add(s); l.push(n); }
+  if(n.left) allSubs(n.left,l,se);
+  if(n.right) allSubs(n.right,l,se);
+  if(n.value) allSubs(n.value,l,se);
   return l;
 }
 
-function allVarsFrom(roots){
-  var s=new Set();(roots||[]).forEach(function(r){cvars(r,s);});return Array.from(s).sort();
+function collectVars(asts) {
+  var s = new Set();
+  (asts||[]).forEach(function(a){ if(a) cvars(a,s); });
+  return Array.from(s).sort();
 }
 
-function allAssigns(vars){
-  var tot=Math.pow(2,vars.length),rows=[];
+function allAssigns(vars) {
+  var tot=Math.pow(2,vars.length), rows=[];
   for(var i=0;i<tot;i++){
-    var v={};vars.forEach(function(vr,j){v[vr]=Boolean((i>>j)&1);});rows.push(v);
+    var v={}; vars.forEach(function(vr,j){ v[vr]=Boolean((i>>j)&1); });
+    rows.push(v);
   }
   return rows;
 }
 
-function cellD(val,cls){
-  var c=val?'vD':'vY',t=val?'D':'Y';
-  return'<td'+(cls?' class="'+cls+'"':'')+'><span class="'+c+'">'+t+'</span></td>';
-}
+// ═══════════════════════════════════════════════════════
+// 5. NATURAL DEDUCTION
+// ═══════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
+function ndProve(hyps, goal) {
+  var steps = [], derived = new Set(), ctr = {n:0}, LIMIT = 800;
 
-var props=[],activeId=null,dragging=null,nextN=1;
-
-function addProp(){var id='p'+Date.now();props.push({id:id,name:'O'+nextN++,root:null});activeId=id;renderAll();}
-function removeProp(id){
-  props=props.filter(function(p){return p.id!==id;});
-  if(activeId===id)activeId=props.length?props[props.length-1].id:null;
-  clrAna();renderAll();
-}
-window.selProp=function(id){activeId=id;renderAll();};
-function getAP(){return props.find(function(p){return p.id===activeId;});}
-function cpList(){return props.filter(function(p){return p.root&&isOk(p.root);});}
-function clrAna(){
-  document.getElementById('ana-res').innerHTML='';
-  document.getElementById('chi-res').innerHTML='';
-  document.getElementById('chi-sec').style.display='none';
-}
-
-function setAt(pid,path,val){
-  var prop=props.find(function(p){return p.id===pid;});if(!prop)return;
-  if(path==='root'){prop.root=val;return;}
-  var parts=path.split('.'),n=prop.root;
-  for(var i=1;i<parts.length-1;i++){if(!n)return;n=n[parts[i]];}
-  if(n)n[parts[parts.length-1]]=val;
-}
-function mkNode(type,name){
-  if(type==='var')return{type:'var',name:name};
-  if(type==='not')return{type:'not',value:null};
-  if(type==='the')return{type:'the',premises:[null],conclusion:null};
-  return{type:type,left:null,right:null};
-}
-window.delNode=function(pid,path){setAt(pid,path,null);clrAna();renderAll();};
-window.clearAT=function(){var p=getAP();if(p){p.root=null;clrAna();renderAll();}};
-
-window.addPremise=function(pid){
-  var prop=props.find(function(p){return p.id===pid;});
-  if(!prop||!prop.root||prop.root.type!=='the')return;
-  prop.root.premises.push(null);clrAna();renderAll();
-};
-window.delPremise=function(pid,idx){
-  var prop=props.find(function(p){return p.id===pid;});
-  if(!prop||!prop.root||prop.root.type!=='the')return;
-  if(prop.root.premises.length<=1)return; // always keep at least 1
-  prop.root.premises.splice(idx,1);clrAna();renderAll();
-};
-function canDrop(type,slotPath){
-  if(type==='the'&&slotPath!=='root')return false;
-  return true;
-}
-function updateTheTok(){
-  var tok=document.getElementById('tok-the'),prop=getAP();
-  tok.classList.toggle('disabled',!!(prop&&prop.root!==null));
-}
-
-// ═══════════════════════════════════════════════
-// RENDER — TREE
-// ═══════════════════════════════════════════════
-
-function rSlot(pid,path){return'<span class="slot" data-pid="'+pid+'" data-path="'+path+'">&#8853;</span>';}
-
-function rNode(pid,n,path){
-  if(n===null)return rSlot(pid,path);
-  var d='<button class="dl" onclick="delNode(\''+pid+'\',\''+path+'\')" title="Sil">&#215;</button>';
-  if(n.type==='var')return'<span class="nv"><span>'+n.name+'</span>'+d+'</span>';
-  if(n.type==='not')return'<span class="nu"><span class="ops u">&#172;</span>'+rNode(pid,n.value,path+'.value')+d+'</span>';
-  if(n.type==='the'){
-    // multi-premise: P₁, P₂, … ∴ C
-    var premsHtml='<span class="the-prems">';
-    n.premises.forEach(function(p,i){
-      if(i>0)premsHtml+='<span class="the-comma">,</span>';
-      premsHtml+=rNode(pid,p,path+'.premises.'+i);
-      if(n.premises.length>1){
-        premsHtml+='<button class="the-dprem" onclick="delPremise(\''+pid+'\','+i+')" title="Öncülü Sil">&#215;</button>';
-      }
-    });
-    premsHtml+='</span>';
-    var addBtn='<button class="the-add-btn" onclick="addPremise(\''+pid+'\')" title="Öncül Ekle">+</button>';
-    var concHtml=rNode(pid,n.conclusion,path+'.conclusion');
-    return'<span class="the-node">'+premsHtml+addBtn
-      +'<span class="ops t" style="font-size:1.05rem;margin:0 .28rem">&#8756;</span>'
-      +concHtml+d+'</span>';
+  function fk(a) { return ps(a); }
+  function has(a) { return derived.has(fk(a)); }
+  function find(a) {
+    var k=fk(a);
+    for(var i=steps.length-1;i>=0;i--)
+      if(steps[i].fkey===k) return steps[i];
+    return null;
   }
-  var S={and:'&#8743;',or:'&#8744;',imp:'&#8594;',iff:'&#8596;'};
-  return'<span class="nb">'+rNode(pid,n.left,path+'.left')
-    +'<span class="ops b">'+S[n.type]+'</span>'
-    +rNode(pid,n.right,path+'.right')+d+'</span>';
-}
 
-// ═══════════════════════════════════════════════
-// RENDER — PROP LIST & EDITOR
-// ═══════════════════════════════════════════════
-
-function renderPL(){
-  var h='';
-  if(!props.length)h='<span class="pe">Henüz önerme yok.</span>';
-  props.forEach(function(p){
-    var ok2=p.root&&isOk(p.root),act=p.id===activeId;
-    h+='<div class="pc'+(act?' active':'')+(ok2&&act?' ok':'')+'" onclick="selProp(\''+p.id+'\')">'
-      +'<div class="pct"><span class="pcn">'+p.name+'</span>'
-      +(ok2?'<span class="pcok">&#10003;</span>':'')
-      +'<button class="pcd" onclick="event.stopPropagation();removeProp(\''+p.id+'\')" title="Sil">&#215;</button></div>'
-      +'<div class="pcf">'+(p.root?ps(p.root):'<em style="opacity:.4">boş</em>')+'</div></div>';
-  });
-  h+='<button class="pc pc-add" onclick="addProp()"><span style="font-size:1.1rem">+</span><span>Yeni</span></button>';
-  document.getElementById('plist').innerHTML=h;
-}
-
-function renderED(){
-  var sec=document.getElementById('sec-ed'),prop=getAP();
-  if(!prop){sec.style.display='none';return;}
-  sec.style.display='';
-  document.getElementById('ed-lbl').textContent=prop.name;
-  var tw=document.getElementById('tw'),fbar=document.getElementById('fbar');
-  if(!prop.root){
-    tw.innerHTML=rSlot(prop.id,'root');
-    fbar.innerHTML='<span class="ph">Paletten bir blok sürükleyip &#8853; yuvasına bırakın...</span>';
-    return;
+  function add(ast, rule, deps, level, isHyp) {
+    var k=fk(ast);
+    if(!isHyp && derived.has(k)) return find(ast);
+    var s={num:steps.length+1, fkey:k, fstr:ps(ast), ast:ast,
+            rule:rule, deps:deps.map(function(d){return d&&d.num?d.num:d;}),
+            level:level, hyp:!!isHyp};
+    steps.push(s);
+    if(!isHyp) derived.add(k);
+    return s;
   }
-  tw.innerHTML=rNode(prop.id,prop.root,'root');
-  if(isOk(prop.root))fbar.textContent=ps(prop.root);
-  else fbar.innerHTML='<span style="color:var(--text)">'+ps(prop.root)+'</span><span class="wn"> — tüm &#8853; yuvalarını doldurun</span>';
-}
 
-// ═══════════════════════════════════════════════
-// RENDER — ANALYSIS SELECTOR
-// ═══════════════════════════════════════════════
+  function snap() { return {len:steps.length, der:new Set(derived)}; }
+  function rollback(sn) {
+    steps.length=sn.len;
+    derived.clear(); sn.der.forEach(function(x){derived.add(x);});
+  }
 
-function renderAnaSel(){
-  var cp=cpList(),el=document.getElementById('ana-sw');
-  if(!cp.length){el.innerHTML='<div class="hint">Bir önermeyi tamamlayın.</div>';return;}
-  var checked=[];
-  document.querySelectorAll('.achk:checked').forEach(function(e){checked.push(e.value);});
-  var items=cp.map(function(p){
-    var chk=checked.indexOf(p.id)>-1?' checked':'';
-    var isThe=p.root&&p.root.type==='the';
-    return'<label class="chk-row"><input type="checkbox" class="achk" value="'+p.id+'"'+chk+'>'
-      +'<span class="nb2">'+p.name+'</span>'
-      +'<span class="fml">'+ps(p.root)+(isThe?' <span style="color:var(--pur);font-size:.62rem">[çıkarım]</span>':'')+'</span>'
-      +'</label>';
-  }).join('');
-  el.innerHTML='<div class="lbl" style="margin-bottom:.42rem">Denetlenecek Önermeler</div>'
-    +items
-    +'<div style="margin-top:.65rem;display:flex;gap:.45rem;flex-wrap:wrap">'
-    +'<button class="btn" onclick="runAna()">Denetle</button>'
-    +'<button class="btng" onclick="runChizelge()">Çizelge Oluştur</button>'
-    +'</div>';
-}
-
-function renderAll(){renderPL();renderED();renderAnaSel();updateTheTok();}
-
-// ═══════════════════════════════════════════════
-// RUN — TRUTH TABLE ANALYSIS
-// ═══════════════════════════════════════════════
-
-window.runAna=function(){
-  var ids=[];
-  document.querySelectorAll('.achk:checked').forEach(function(e){ids.push(e.value);});
-  var res=document.getElementById('ana-res');
-  if(!ids.length){res.innerHTML='<div class="err">En az bir önerme seçin.</div>';return;}
-  var selProps=ids.map(function(id){return props.find(function(p){return p.id===id;});});
-  try{
-    var vars=allVarsFrom(selProps.map(function(p){return p.root;}));
-    if(vars.length>14)throw new Error('Çok fazla değişken. Maks 14.');
-    var assigns=allAssigns(vars);
-    var vs0=new Set(vars);
-    var groups=selProps.map(function(p){
-      var sb=allSubs(p.root).sort(function(a,b){var d=dep(a)-dep(b);return d||ps(a).localeCompare(ps(b));});
-      var subCols=sb.map(ps).filter(function(c){return!vs0.has(c);});
-      return{prop:p,sb:sb,subCols:subCols,mainCol:ps(p.root)};
-    });
-    var rows=assigns.map(function(vals){
-      var row={};vars.forEach(function(v){row[v]=vals[v];});
-      groups.forEach(function(g){g.sb.forEach(function(e){row[ps(e)]=ev(e,vals);});});
-      return row;
-    });
-    var singleProp=groups.length===1;
-    var h='<div class="fi"><div class="legend"><span class="li"><span class="ls ls-t"></span>D alan satırlar</span><span class="li"><span class="ls ls-f"></span>Y alan satırlar</span></div>';
-    h+='<div class="tblw"><table class="tt"><thead><tr>';
-    vars.forEach(function(v){h+='<th>'+v+'</th>';});
-    groups.forEach(function(g,gi){
-      g.subCols.forEach(function(c,ci){h+='<th'+(ci===0?' class="sp"':'')+'>'+c+'</th>';});
-      h+='<th class="'+(g.subCols.length===0&&gi>0?'sp ':'')+'main-h">'+g.prop.name+': '+g.mainCol+'</th>';
-    });
-    h+='</tr></thead><tbody>';
-    rows.forEach(function(row){
-      var rc=singleProp?(row[groups[0].mainCol]?'rt':'rf'):'';
-      h+='<tr'+(rc?' class="'+rc+'"':'')+'>';
-      vars.forEach(function(v){h+=cellD(row[v],'');});
-      groups.forEach(function(g,gi){
-        g.subCols.forEach(function(c,ci){h+=cellD(row[c],ci===0?'sp':'');});
-        h+=cellD(row[g.mainCol],(g.subCols.length===0&&gi>0)?'sp':'');
-      });
-      h+='</tr>';
-    });
-    h+='</tbody></table></div><div class="rcards">';
-    groups.forEach(function(g){
-      var mainVals=rows.map(function(r){return r[g.mainCol];});
-      var allD=mainVals.every(Boolean),anyD=mainVals.some(Boolean);
-      var tc=mainVals.filter(Boolean).length,fc=mainVals.length-tc;
-      var st=allD?'tot':anyD?'olu':'cel';
-      var slbl={tot:'Totoloji',olu:'Olumsal',cel:'Çelişki'};
-      var scls={tot:'b-tot',olu:'b-olu',cel:'b-cel'};
-      var isThe=g.prop.root.type==='the';
-      // build conditional string for display: (P1∧P2∧…)→C
-      var condStr='';
-      if(isThe){
-        var prems=g.prop.root.premises;
-        var concNode=g.prop.root.conclusion;
-        var premStr=prems.length===1?ps(prems[0]):'('+prems.map(ps).join('\u2227')+')';
-        condStr=premStr+'\u2192'+ps(concNode);
-      }
-      h+='<div class="rcard"><div class="rcard-head">'+g.prop.name
-        +'<span class="badge '+scls[st]+'">'+slbl[st]+'</span>'
-        +'<span class="badge '+(anyD?'b-ok':'b-no')+'">'+(anyD?'Tutarlı':'Tutarsız')+'</span>'
-        +'<span class="badge '+(allD?'b-ok':'b-no')+'">'+(allD?'Geçerli':'Geçersiz')+'</span>'
-        +'</div>';
-      if(isThe){
-        h+='<div class="rcard-fml" style="border-left-color:var(--pur-bd)">'+ps(g.prop.root)+'</div>';
-        h+='<div class="rcard-fml" style="font-size:.67rem;color:var(--text2);border-left-color:var(--border)">Eşdeğer koşullu: <span style="color:var(--text)">'+condStr+'</span></div>';
-        h+='<div class="rn">'+(allD?'Çıkarım tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — tutarlı ve geçerlidir.'
-          :'<strong>'+fc+'</strong> satırda <span class="vY">Y</span> — geçersizdir'+(anyD?', ancak tutarlıdır.':'.')+'</div>');
-        if(allD)h+='</div>';
-      } else {
-        h+='<div class="rcard-fml">'+ps(g.prop.root)+'</div>';
-        if(allD)h+='<div class="rn">Tüm <strong>'+mainVals.length+'</strong> satırda <span class="vD">D</span> — hem tutarlı hem geçerlidir.</div>';
-        else if(anyD)h+='<div class="rn"><strong>'+tc+'</strong> satırda <span class="vD">D</span>, <strong>'+fc+'</strong> satırda <span class="vY">Y</span> — tutarlı ancak geçerli değildir.</div>';
-        else h+='<div class="rn">Hiçbir satırda <span class="vD">D</span> değeri alınmamaktadır — tutarsız ve geçersizdir.</div>';
-      }
-      h+='</div>';
-    });
-    if(groups.length>=2){
-      h+='<div style="margin-top:.25rem;font-family:var(--mono);font-size:.6rem;color:var(--text2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:.55rem">Eşdeğerlik Denetlemeleri</div>';
-      for(var i=0;i<groups.length;i++){
-        for(var j=i+1;j<groups.length;j++){
-          var g1=groups[i],g2=groups[j];
-          var equiv=rows.every(function(r){return r[g1.mainCol]===r[g2.mainCol];});
-          var dc=rows.filter(function(r){return r[g1.mainCol]!==r[g2.mainCol];}).length;
-          h+='<div class="eq-card"><div class="eq-head"><span>'+g1.prop.name+'</span><span class="eq-sym">'+(equiv?'&#8801;':'&#8802;')+'</span><span>'+g2.prop.name+'</span>'
-            +'<span class="badge '+(equiv?'b-ok':'b-no')+'">'+(equiv?'Eşdeğer':'Eşdeğer Değil')+'</span></div>'
-            +'<div class="rn">'+(equiv?'Her satırda aynı doğruluk değeri alınmaktadır — eşdeğerdir.':'<strong>'+dc+'</strong> satırda farklı değer — eşdeğer değildir.')+'</div></div>';
+  // Forward: apply elimination/structural rules
+  function saturate(level) {
+    var changed=true, iters=0;
+    while(changed && iters++<50 && ctr.n<LIMIT) {
+      changed=false;
+      var n=steps.length;
+      for(var i=0;i<n;i++) {
+        if(ctr.n++>LIMIT) return;
+        var fi=steps[i].ast, ni=steps[i].num;
+        function tryAdd(ast,rule,deps) {
+          if(!has(ast)){add(ast,rule,deps,level);changed=true;return true;}
+          return false;
+        }
+        if(fi.type==='not'&&fi.value&&fi.value.type==='not')
+          tryAdd(fi.value.value,'¬¬E',[ni]);
+        if(fi.type==='and'){tryAdd(fi.left,'∧E',[ni]);tryAdd(fi.right,'∧E',[ni]);}
+        if(fi.type==='iff'){
+          tryAdd({type:'imp',left:fi.left,right:fi.right},'↔E',[ni]);
+          tryAdd({type:'imp',left:fi.right,right:fi.left},'↔E',[ni]);
+        }
+        if(fi.type==='not'&&fi.value&&fi.value.type==='and')
+          tryAdd({type:'or',left:neg(fi.value.left),right:neg(fi.value.right)},'De Morgan',[ni]);
+        if(fi.type==='not'&&fi.value&&fi.value.type==='or')
+          tryAdd({type:'and',left:neg(fi.value.left),right:neg(fi.value.right)},'De Morgan',[ni]);
+        for(var j=0;j<n;j++){
+          if(i===j) continue;
+          var fj=steps[j].ast, nj=steps[j].num;
+          if(fi.type==='imp'&&eqs(fi.left,fj)) tryAdd(fi.right,'→E',[ni,nj]);
+          if(fi.type==='imp'&&fj.type==='not'&&eqs(fi.right,fj.value)) tryAdd(neg(fi.left),'MT',[ni,nj]);
+          if(fi.type==='or'){
+            if(fj.type==='not'&&eqs(fi.left,fj.value))  tryAdd(fi.right,'DS',[ni,nj]);
+            if(fj.type==='not'&&eqs(fi.right,fj.value)) tryAdd(fi.left,'DS',[ni,nj]);
+          }
+          // Hypothetical syllogism
+          if(fi.type==='imp'&&fj.type==='imp'&&eqs(fi.right,fj.left))
+            tryAdd({type:'imp',left:fi.left,right:fj.right},'HS',[ni,nj]);
         }
       }
     }
-    h+='</div></div>';
-    res.innerHTML=h;
-  }catch(e){res.innerHTML='<div class="err">'+e.message+'</div>';}
-};
+  }
 
-// ═══════════════════════════════════════════════
-// TABLEAU ENGINE
-// ═══════════════════════════════════════════════
+  function findContr() {
+    for(var i=0;i<steps.length;i++){
+      var fi=steps[i].ast;
+      if(fi.type==='not'&&fi.value){var p=find(fi.value);if(p)return[steps[i],p];}
+      else{var q=find(neg(fi));if(q)return[steps[i],q];}
+    }
+    return null;
+  }
 
-var T_LIMIT=300; // max formula nodes
+  function prove(goal, level, depth) {
+    if(ctr.n++>LIMIT || depth>8) return false;
+    saturate(level);
+    if(has(goal)) return true;
+    var sn=snap();
 
-function tNeg(n){return{type:'not',value:n};}
+    // →I
+    if(goal.type==='imp'){
+      var h=add(goal.left,'Varsayım',[],level+1,true);
+      if(prove(goal.right,level+1,depth+1)){
+        var c=find(goal.right); add(goal,'→I',[h.num,c.num],level); return true;
+      }
+      rollback(sn); return false;
+    }
+    // ∧I
+    if(goal.type==='and'){
+      if(prove(goal.left,level,depth+1)&&prove(goal.right,level,depth+1)){
+        add(goal,'∧I',[find(goal.left).num,find(goal.right).num],level); return true;
+      }
+      rollback(sn); return false;
+    }
+    // ∨I
+    if(goal.type==='or'){
+      var sn2=snap();
+      if(prove(goal.left,level,depth+1)){add(goal,'∨I',[find(goal.left).num],level);return true;}
+      rollback(sn2);
+      if(prove(goal.right,level,depth+1)){add(goal,'∨I',[find(goal.right).num],level);return true;}
+      rollback(sn); return false;
+    }
+    // ↔I
+    if(goal.type==='iff'){
+      var ab={type:'imp',left:goal.left,right:goal.right};
+      var ba={type:'imp',left:goal.right,right:goal.left};
+      if(prove(ab,level,depth+1)&&prove(ba,level,depth+1)){
+        add(goal,'↔I',[find(ab).num,find(ba).num],level); return true;
+      }
+      rollback(sn); return false;
+    }
+    // ¬I / RAA
+    if(goal.type==='not'){
+      var h=add(goal.value,'Varsayım (RAA)',[],level+1,true);
+      saturate(level+1);
+      var ct=findContr();
+      if(ct){add(goal,'¬I (RAA)',[h.num,ct[0].num,ct[1].num],level);return true;}
+      if(prove(neg(goal.value),level+1,depth+1)){
+        ct=findContr();
+        if(ct){add(goal,'¬I (RAA)',[h.num,ct[0].num,ct[1].num],level);return true;}
+      }
+      rollback(sn); return false;
+    }
+    // ∨E
+    for(var i=0;i<steps.length;i++){
+      var st=steps[i];
+      if(st.ast.type==='or'){
+        var disj=st.ast, dn=st.num;
+        var sn3=snap();
+        var h1=add(disj.left,'Varsayım (∨E)',[],level+1,true);
+        if(prove(goal,level+1,depth+1)){
+          var c1=find(goal).num;
+          var sn4=snap(); rollback(sn3);
+          var h2=add(disj.right,'Varsayım (∨E)',[],level+1,true);
+          if(prove(goal,level+1,depth+1)){
+            add(goal,'∨E',[dn,c1,find(goal).num],level); return true;
+          }
+          rollback(sn4);
+        }
+        rollback(sn3);
+      }
+    }
+    return false;
+  }
 
-function tIsLit(n){
-  return n.type==='var'||(n.type==='not'&&n.value&&n.value.type==='var');
+  // Load axioms
+  hyps.forEach(function(h) { add(h,'Aksiyom',[],0,false); });
+  var ok = prove(goal,0,0);
+  if(!ok){ saturate(0); if(!has(goal)) return null; }
+
+  // Renumber
+  steps.forEach(function(s,i){ s.num=i+1; });
+  return steps;
 }
 
-// Returns the decomposition rule for a formula, or null if it's a literal.
-// type 'A' = alpha (linear), type 'B' = beta (branching)
+// ═══════════════════════════════════════════════════════
+// 6. RESOLUTION
+// ═══════════════════════════════════════════════════════
+
+function toCNF(n) {
+  function elBi(n){if(!n||n.type==='var')return n;if(n.type==='not')return{type:'not',value:elBi(n.value)};if(n.type==='iff')return elBi({type:'and',left:{type:'imp',left:n.left,right:n.right},right:{type:'imp',left:n.right,right:n.left}});return{type:n.type,left:elBi(n.left),right:elBi(n.right)};}
+  function elImp(n){if(!n||n.type==='var')return n;if(n.type==='not')return{type:'not',value:elImp(n.value)};if(n.type==='imp')return elImp({type:'or',left:{type:'not',value:n.left},right:n.right});return{type:n.type,left:elImp(n.left),right:elImp(n.right)};}
+  function pushNeg(n){if(!n||n.type==='var')return n;if(n.type==='not'){var v=n.value;if(v.type==='not')return pushNeg(v.value);if(v.type==='and')return pushNeg({type:'or',left:{type:'not',value:v.left},right:{type:'not',value:v.right}});if(v.type==='or')return pushNeg({type:'and',left:{type:'not',value:v.left},right:{type:'not',value:v.right}});return{type:'not',value:pushNeg(v)};}return{type:n.type,left:pushNeg(n.left),right:pushNeg(n.right)};}
+  function dist(n){if(!n||n.type==='var'||n.type==='not')return n;if(n.type==='and')return{type:'and',left:dist(n.left),right:dist(n.right)};var l=dist(n.left),r=dist(n.right);if(r.type==='and')return dist({type:'and',left:{type:'or',left:l,right:r.left},right:{type:'or',left:l,right:r.right}});if(l.type==='and')return dist({type:'and',left:{type:'or',left:l.left,right:r},right:{type:'or',left:l.right,right:r}});return{type:'or',left:l,right:r};}
+  function getLits(n){if(n.type==='or')return getLits(n.left).concat(getLits(n.right));if(n.type==='var')return[{pos:true,name:n.name}];if(n.type==='not'&&n.value&&n.value.type==='var')return[{pos:false,name:n.value.name}];throw new Error('CNF hatası');}
+  function getCls(n){if(n.type==='and')return getCls(n.left).concat(getCls(n.right));return[getLits(n)];}
+  function dd(c){var s=new Set(),r=[];c.forEach(function(l){var k=(l.pos?'+':'-')+l.name;if(!s.has(k)){s.add(k);r.push(l);}});return r;}
+  function taut(c){var ps=new Set(c.filter(function(l){return l.pos;}).map(function(l){return l.name;}));return c.some(function(l){return!l.pos&&ps.has(l.name);});}
+  var r=dist(pushNeg(elImp(elBi(n))));
+  return getCls(r).map(dd).filter(function(c){return!taut(c);});
+}
+
+function clauseKey(c){return c.map(function(l){return(l.pos?'+':'-')+l.name;}).sort().join('|');}
+function clauseStr(c){
+  if(!c.length)return'⊥';
+  return c.map(function(l){return(l.pos?'':'\u00AC')+l.name;}).join('∨');
+}
+function doResolve(c1,c2){
+  var res=[];
+  for(var i=0;i<c1.length;i++)for(var j=0;j<c2.length;j++){
+    if(c1[i].name===c2[j].name&&c1[i].pos!==c2[j].pos){
+      var merged=c1.filter(function(_,k){return k!==i;}).concat(c2.filter(function(_,k){return k!==j;}));
+      var seen=new Set(),r=[];
+      merged.forEach(function(l){var k=(l.pos?'+':'-')+l.name;if(!seen.has(k)){seen.add(k);r.push(l);}});
+      var pos=new Set(r.filter(function(l){return l.pos;}).map(function(l){return l.name;}));
+      if(!r.some(function(l){return!l.pos&&pos.has(l.name);}))
+        res.push({clause:r,lit:c1[i].name});
+    }
+  }
+  return res;
+}
+
+function resolutionProve(hyps, goal) {
+  var MAX=500, steps=[], keySet=new Set();
+  function addClause(c,rule,from,lit,src){
+    var k=clauseKey(c);
+    if(keySet.has(k))return false;
+    keySet.add(k);
+    steps.push({clause:c,rule:rule,from:from||[],lit:lit||'',src:src||'',num:steps.length+1});
+    return true;
+  }
+  hyps.forEach(function(h,i){
+    try{toCNF(h).forEach(function(c){addClause(c,'Aksiyom',[],'',(i+1));});}catch(e){}
+  });
+  try{toCNF(neg(goal)).forEach(function(c){addClause(c,'¬Hedef',[],'',-1);});}catch(e){return null;}
+  if(keySet.has(clauseKey([])))return steps;
+  var changed=true;
+  while(changed&&steps.length<MAX){
+    changed=false;
+    var n=steps.length;
+    for(var i=0;i<n&&steps.length<MAX;i++){
+      for(var j=i+1;j<n&&steps.length<MAX;j++){
+        doResolve(steps[i].clause,steps[j].clause).forEach(function(r){
+          if(addClause(r.clause,'Çözünürlük',[steps[i].num,steps[j].num],r.lit)){
+            changed=true;
+          }
+        });
+        if(keySet.has(clauseKey([])))return steps;
+      }
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════
+// 7. ANALYTIC TABLEAU
+// ═══════════════════════════════════════════════════════
+
+var TAB_LIMIT = 400;
+
+function tIsLit(n){return n.type==='var'||(n.type==='not'&&n.value&&n.value.type==='var');}
+
 function tRule(n){
   if(tIsLit(n))return null;
-  if(n.type==='and')   return{type:'A',fs:[n.left,n.right],sym:'\u2227'};
-  if(n.type==='or')    return{type:'B',l:[n.left],r:[n.right],sym:'\u2228'};
-  if(n.type==='imp')   return{type:'B',l:[tNeg(n.left)],r:[n.right],sym:'\u2192'};
-  if(n.type==='iff')   return{type:'B',l:[n.left,n.right],r:[tNeg(n.left),tNeg(n.right)],sym:'\u2194'};
+  if(n.type==='and') return{a:true, fs:[n.left,n.right], sym:'∧'};
+  if(n.type==='or')  return{a:false, l:[n.left], r:[n.right], sym:'∨'};
+  if(n.type==='imp') return{a:false, l:[neg(n.left)], r:[n.right], sym:'→'};
+  if(n.type==='iff') return{a:false, l:[n.left,n.right], r:[neg(n.left),neg(n.right)], sym:'↔'};
   if(n.type==='not'){
-    var i=n.value;
-    if(!i)return null;
-    if(i.type==='not')  return{type:'A',fs:[i.value],sym:'\u00AC\u00AC'};
-    if(i.type==='and')  return{type:'B',l:[tNeg(i.left)],r:[tNeg(i.right)],sym:'\u00AC\u2227'};
-    if(i.type==='or')   return{type:'A',fs:[tNeg(i.left),tNeg(i.right)],sym:'\u00AC\u2228'};
-    if(i.type==='imp')  return{type:'A',fs:[i.left,tNeg(i.right)],sym:'\u00AC\u2192'};
-    if(i.type==='iff')  return{type:'B',l:[i.left,tNeg(i.right)],r:[tNeg(i.left),i.right],sym:'\u00AC\u2194'};
+    var v=n.value; if(!v)return null;
+    if(v.type==='not') return{a:true, fs:[v.value], sym:'¬¬'};
+    if(v.type==='and') return{a:false, l:[neg(v.left)], r:[neg(v.right)], sym:'¬∧'};
+    if(v.type==='or')  return{a:true, fs:[neg(v.left),neg(v.right)], sym:'¬∨'};
+    if(v.type==='imp') return{a:true, fs:[v.left,neg(v.right)], sym:'¬→'};
+    if(v.type==='iff') return{a:false, l:[v.left,neg(v.right)], r:[neg(v.left),v.right], sym:'¬↔'};
   }
   return null;
 }
 
-// Find a contradiction (literal A and ¬A) among items on the current path.
-// Returns [rowOfA, rowOfNotA] or null.
 function tContr(items){
-  var pos={},neg={};
+  var pos={},neg2={};
   items.forEach(function(it){
     var n=it.ast;
-    if(n.type==='var') pos[n.name]=it.row;
-    else if(n.type==='not'&&n.value&&n.value.type==='var') neg[n.value.name]=it.row;
+    if(n.type==='var')pos[n.name]=it.row;
+    else if(n.type==='not'&&n.value&&n.value.type==='var')neg2[n.value.name]=it.row;
   });
-  for(var nm in pos){ if(neg.hasOwnProperty(nm)) return[pos[nm],neg[nm]]; }
+  for(var nm in pos)if(Object.prototype.hasOwnProperty.call(neg2,nm))return[pos[nm],neg2[nm]];
   return null;
 }
 
-// Recursively build the tableau tree.
-// segRows: formulas displayed at this segment (the "header" rows)
-// allPath: all formulas accumulated on this branch path (including segRows)
-// procSet: Set of row numbers that have been processed
-// rowCtr: {n: current row counter}
-function tBuild(segRows,allPath,procSet,rowCtr){
-  if(rowCtr.n>T_LIMIT) throw new Error('Çizelge sınır aşıldı ('+T_LIMIT+' adım). Daha basit bir formül deneyin.');
-
-  // 1. Check for contradiction
-  var contr=tContr(allPath);
-  if(contr) return{type:'closed',rows:segRows,closedBy:contr};
-
-  // 2. Find first unprocessed non-literal on the path
-  var toProc=null;
-  for(var i=0;i<allPath.length;i++){
-    if(!procSet.has(allPath[i].row)&&tRule(allPath[i].ast)){toProc=allPath[i];break;}
+function tBuild(segRows, allPath, proc, rc){
+  if(rc.n>TAB_LIMIT)throw new Error('Çizelge sınırı aşıldı.');
+  var ct=tContr(allPath);
+  if(ct)return{type:'closed',rows:segRows,by:ct};
+  var toP=null;
+  for(var i=0;i<allPath.length;i++)
+    if(!proc.has(allPath[i].row)&&tRule(allPath[i].ast)){toP=allPath[i];break;}
+  if(!toP)return{type:'open',rows:segRows};
+  var np=new Set(proc); np.add(toP.row);
+  var rule=tRule(toP.ast);
+  if(rule.a){ // alpha
+    var ni=rule.fs.map(function(f){return{row:++rc.n,ast:f,from:toP.row,sym:rule.sym};});
+    return{type:'alpha',rows:segRows,procRow:toP.row,child:tBuild(ni,allPath.concat(ni),np,rc)};
   }
-
-  // 3. If none, branch is complete and open
-  if(!toProc) return{type:'open',rows:segRows};
-
-  // 4. Apply rule
-  var newProc=new Set(procSet);
-  newProc.add(toProc.row);
-  var rule=tRule(toProc.ast);
-
-  if(rule.type==='A'){
-    // Alpha: add formulas linearly, continue on same branch
-    var newItems=rule.fs.map(function(f){return{row:++rowCtr.n,ast:f,fromRow:toProc.row,sym:rule.sym};});
-    var child=tBuild(newItems,allPath.concat(newItems),newProc,rowCtr);
-    return{type:'alpha',rows:segRows,procRow:toProc.row,sym:rule.sym,child:child};
-  } else {
-    // Beta: split branch
-    var lItems=rule.l.map(function(f){return{row:++rowCtr.n,ast:f,fromRow:toProc.row,sym:rule.sym};});
-    var rItems=rule.r.map(function(f){return{row:++rowCtr.n,ast:f,fromRow:toProc.row,sym:rule.sym};});
-    var lChild=tBuild(lItems,allPath.concat(lItems),newProc,rowCtr);
-    var rChild=tBuild(rItems,allPath.concat(rItems),newProc,rowCtr);
-    return{type:'beta',rows:segRows,procRow:toProc.row,sym:rule.sym,left:lChild,right:rChild};
-  }
+  var li=rule.l.map(function(f){return{row:++rc.n,ast:f,from:toP.row,sym:rule.sym};});
+  var ri=rule.r.map(function(f){return{row:++rc.n,ast:f,from:toP.row,sym:rule.sym};});
+  return{type:'beta',rows:segRows,procRow:toP.row,
+    left:tBuild(li,allPath.concat(li),np,rc),
+    right:tBuild(ri,allPath.concat(ri),np,rc)};
 }
 
-// Collect all processed row numbers from the tree
-function tMarkProc(seg,set){
-  if(seg.procRow) set.add(seg.procRow);
-  if(seg.child)  tMarkProc(seg.child,set);
-  if(seg.left)   tMarkProc(seg.left,set);
-  if(seg.right)  tMarkProc(seg.right,set);
-}
-
-// Is every branch closed?
 function tAllClosed(seg){
-  if(seg.type==='closed') return true;
-  if(seg.type==='open')   return false;
-  if(seg.type==='alpha')  return tAllClosed(seg.child);
-  if(seg.type==='beta')   return tAllClosed(seg.left)&&tAllClosed(seg.right);
-  return false;
+  if(seg.type==='closed')return true;
+  if(seg.type==='open')return false;
+  if(seg.type==='alpha')return tAllClosed(seg.child);
+  return tAllClosed(seg.left)&&tAllClosed(seg.right);
 }
 
-// Collect literals from first open branch (for model display)
-function tOpenModel(seg){
+function tMarkProc(seg,set){
+  if(seg.procRow)set.add(seg.procRow);
+  if(seg.child)tMarkProc(seg.child,set);
+  if(seg.left)tMarkProc(seg.left,set);
+  if(seg.right)tMarkProc(seg.right,set);
+}
+
+function tGetModel(seg){
   if(seg.type==='open'){
-    var model={};
+    var m={};
     (seg.rows||[]).forEach(function(it){
-      if(it.ast.type==='var') model[it.ast.name]=true;
-      else if(it.ast.type==='not'&&it.ast.value&&it.ast.value.type==='var') model[it.ast.value.name]=false;
+      if(it.ast.type==='var')m[it.ast.name]=true;
+      else if(it.ast.type==='not'&&it.ast.value&&it.ast.value.type==='var')m[it.ast.value.name]=false;
     });
-    return model;
+    return m;
   }
-  if(seg.type==='alpha') return tOpenModel(seg.child);
+  if(seg.type==='alpha')return tGetModel(seg.child);
   if(seg.type==='beta'){
-    if(!tAllClosed(seg.left))  return tOpenModel(seg.left);
-    if(!tAllClosed(seg.right)) return tOpenModel(seg.right);
+    if(!tAllClosed(seg.left))return tGetModel(seg.left);
+    if(!tAllClosed(seg.right))return tGetModel(seg.right);
   }
   return null;
 }
 
-// ── TABLEAU RENDERER ──
-// Renders the content of a branch (rows + continuation).
-// Each segment may continue linearly (alpha) or fork (beta).
-function renderBranch(seg,procSet){
-  // collect rows for this segment
-  var rowsHtml='';
+function renderBranch(seg, procSet) {
+  var h='';
   (seg.rows||[]).forEach(function(it){
     var proc=procSet.has(it.row);
-    rowsHtml+='<div class="t-row">'
+    h+='<div class="t-row">'
       +'<span class="t-rn">'+it.row+'.</span>'
-      +'<span class="t-fm">'+ps(it.ast)+'</span>'
-      +(proc?'<span class="t-ck">&thinsp;&#10003;</span>':'')
-      +(it.fromRow!=null?'<span class="t-ref">&thinsp;('+it.fromRow+',&thinsp;'+it.sym+')</span>':'')
+      +'<span class="t-fm">'+esc(ps(it.ast))+'</span>'
+      +(proc?'<span class="t-ck"> ✓</span>':'')
+      +(it.from!=null?'<span class="t-ref"> ('+it.from+', '+it.sym+')</span>':'')
       +'</div>';
   });
-
-  var h=(rowsHtml?'<div class="t-rows">'+rowsHtml+'</div>':'');
-
-  if(seg.type==='closed'){
-    // ✗ with the two contradicting row numbers
-    h+='<div class="t-closed">&#215;&ensp;('+seg.closedBy[0]+',&thinsp;'+seg.closedBy[1]+')</div>';
-  } else if(seg.type==='open'){
-    h+='<div class="t-open">&#9675;</div>';
-  } else if(seg.type==='alpha'){
-    // linear continuation — just keep building downward
-    h+=renderBranch(seg.child,procSet);
-  } else if(seg.type==='beta'){
-    // fork: vertical connector → horizontal bar → two sub-trees
-    h+='<div class="t-vline"></div>'
-      +'<div class="t-split">'
+  if(seg.type==='closed')
+    h+='<div class="t-x">✕ ('+seg.by[0]+', '+seg.by[1]+')</div>';
+  else if(seg.type==='open')
+    h+='<div class="t-o">○</div>';
+  else if(seg.type==='alpha')
+    h+=renderBranch(seg.child, procSet);
+  else if(seg.type==='beta')
+    h+='<div class="t-vl"></div><div class="t-split">'
       +'<div class="t-bl"><div class="t-tree">'+renderBranch(seg.left,procSet)+'</div></div>'
       +'<div class="t-br"><div class="t-tree">'+renderBranch(seg.right,procSet)+'</div></div>'
       +'</div>';
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════
+// 8. TRUTH TABLE
+// ═══════════════════════════════════════════════════════
+
+function buildTruthTable(hyps, goal){
+  var allAsts = hyps.concat(goal?[goal]:[]);
+  var vars = collectVars(allAsts);
+  if(vars.length>14) throw new Error('Çok fazla değişken ('+vars.length+'). Maks 14.');
+  var assigns = allAssigns(vars);
+  var vsSet = new Set(vars);
+
+  // Collect sub-expressions
+  var seen = new Set(vars);
+  var subs = [];
+  allAsts.forEach(function(a){
+    allSubs(a).sort(function(x,y){return dep(x)-dep(y)||ps(x).localeCompare(ps(y));})
+      .forEach(function(e){var k=ps(e);if(!seen.has(k)){seen.add(k);subs.push(e);}});
+  });
+
+  var hypStrs = hyps.map(ps);
+  var goalStr = goal ? ps(goal) : null;
+
+  var rows = assigns.map(function(vals){
+    var row = {};
+    vars.forEach(function(v){row[v]=vals[v];});
+    subs.forEach(function(e){row[ps(e)]=ev(e,vals);});
+    return row;
+  });
+
+  var validRows = rows.filter(function(r){return hyps.every(function(h){return r[ps(h)];});});
+  var proved = goal && validRows.length>0 && validRows.every(function(r){return r[goalStr];});
+
+  var h='<div class="tbl-wrap"><table class="tt"><thead><tr>';
+  vars.forEach(function(v){h+='<th>'+esc(v)+'</th>';});
+  var fstSub=true;
+  subs.forEach(function(e){
+    var k=ps(e);
+    var isKey=hypStrs.indexOf(k)>=0||k===goalStr;
+    var sp=fstSub?'sp':'';
+    var gh=isKey?'gh':'';
+    var cls=[sp,gh].filter(Boolean).join(' ');
+    if(fstSub)fstSub=false;
+    h+='<th'+(cls?' class="'+cls+'"':'')+'>'+esc(k)+'</th>';
+  });
+  h+='</tr></thead><tbody>';
+  rows.forEach(function(row){
+    var hTrue=hyps.every(function(h2){return row[ps(h2)];});
+    var gVal=goal?row[goalStr]:null;
+    var rc='';
+    if(goal&&hTrue){rc=gVal?'r-ok':'r-ko';}
+    h+='<tr'+(rc?' class="'+rc+'"':'')+'>';
+    vars.forEach(function(v){h+='<td><span class="'+(row[v]?'vD':'vY')+'">'+(row[v]?'D':'Y')+'</span></td>';});
+    var fst2=true;
+    subs.forEach(function(e){
+      var val=row[ps(e)];
+      var sp=fst2?'sp':'';fst2=false;
+      h+='<td'+(sp?' class="'+sp+'"':'')+'><span class="'+(val?'vD':'vY')+'">'+(val?'D':'Y')+'</span></td>';
+    });
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+
+  // Status for standalone propositions (no hyps)
+  if(!hyps.length&&goal){
+    var allD=rows.every(function(r){return r[goalStr];});
+    var anyD=rows.some(function(r){return r[goalStr];});
+    var st=allD?'tot':anyD?'olu':'cel';
+    var sl={tot:'Totoloji',olu:'Olumsal',cel:'Çelişki'};
+    var sc={tot:'b-tot',olu:'b-olu',cel:'b-cel'};
+    h+='<div style="margin-bottom:.6rem"><span class="badge '+sc[st]+'">'+sl[st]+'</span></div>';
+  }
+
+  if(goal){
+    if(validRows.length===0){
+      h+='<div class="tt-note">Aksiyomların hepsinin aynı anda doğru olduğu satır yoktur (aksiyomlar tutarsız).</div>';
+    } else if(proved){
+      h+='<div class="tt-note">Aksiyomların doğru olduğu <strong>'+validRows.length+'</strong> satırın tamamında hedef doğrudur → <strong>Geçerli çıkarım.</strong></div>';
+    } else {
+      var bad=validRows.filter(function(r){return!r[goalStr];}).length;
+      h+='<div class="tt-note">'+bad+' satırda aksiyomlar doğru ama hedef yanlış → <strong>Geçersiz çıkarım.</strong></div>';
+    }
   }
   return h;
 }
 
-function renderTSeg(seg,procSet){
-  return '<div class="t-tree">'+renderBranch(seg,procSet)+'</div>';
+// ═══════════════════════════════════════════════════════
+// 9. RENDER
+// ═══════════════════════════════════════════════════════
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-// ═══════════════════════════════════════════════
-// RUN — TABLEAU
-// ═══════════════════════════════════════════════
+function renderProofSteps(steps, axNames, goalStr){
+  if(!steps) return '<div class="proof-fail">Doğal çıkarım kanıtı bulunamadı (çok karmaşık veya geçersiz).</div>';
 
-window.runChizelge=function(){
-  var ids=[];
-  document.querySelectorAll('.achk:checked').forEach(function(e){ids.push(e.value);});
-  var res=document.getElementById('chi-res');
-  var chiSec=document.getElementById('chi-sec');
-  if(!ids.length){chiSec.style.display='none';res.innerHTML='';return;}
+  // Find where axioms end
+  var divIdx=-1;
+  for(var i=0;i<steps.length;i++){
+    if(steps[i].rule==='Aksiyom')divIdx=i;
+    else break;
+  }
 
-  var selProps=ids.map(function(id){return props.find(function(p){return p.id===id;});});
+  var h='<div class="proof-block">';
+  h+='<div class="proof-header">Kanıt Adımları</div>';
+  h+='<div class="proof-steps">';
 
-  // Build initial formula list.
-  // ∴ formula → push all premises + ¬conclusion (validity check)
-  var initAsts=[];
-  var hasThe=false;
-  selProps.forEach(function(p){
-    if(p.root.type==='the'){
-      p.root.premises.forEach(function(pr){initAsts.push(pr);});
-      initAsts.push(tNeg(p.root.conclusion));
-      hasThe=true;
-    } else {
-      initAsts.push(p.root);
-    }
+  steps.forEach(function(s,i){
+    var isGoal = s.fstr===goalStr && !s.hyp && s.level===0 && i===steps.length-1;
+    var ruleStr = s.rule;
+    if(s.deps&&s.deps.length) ruleStr += ' (' + s.deps.join(', ') + ')';
+
+    // Add separator after axioms
+    if(i===divIdx+1&&divIdx>=0) h+='<div class="proof-divider"></div>';
+
+    h+='<div class="ps-step'+(s.hyp?' style="margin-left:'+(s.level*1.2)+'rem"':'')+'"'
+      +(s.hyp?' style="margin-left:'+(s.level*1.2)+'rem"':'')+'>'
+      +'<span class="ps-num">'+s.num+'.</span>'
+      +'<span class="ps-f'+(s.hyp?' hyp-f':'')+(isGoal?' goal-f':'')+'">'
+      +esc(s.fstr)+'</span>'
+      +'<span class="ps-rule'+(s.hyp?' hyp-rule':'')+'">'
+      +esc(ruleStr)+'</span>'
+      +'</div>';
   });
 
+  h+='</div>';
+  h+='<div class="proof-qed">■ Q.E.D.</div>';
+  h+='</div>';
+  return h;
+}
+
+function renderResolution(steps){
+  if(!steps) return '<div class="proof-fail">Çözünürlük kanıtı bulunamadı.</div>';
+  var h='<div class="proof-block"><div class="proof-header">Çözünürlük Adımları (CNF)</div><div class="proof-steps">';
+  var lastGrp='';
+  steps.forEach(function(s){
+    var grp=s.rule;
+    if(grp!==lastGrp){
+      h+='<div style="font-family:var(--mono);font-size:.57rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.1px;padding:.4rem .85rem .1rem;border-top:1px solid var(--border);margin-top:.2rem">'+esc(grp==='Aksiyom'?'CNF (Aksiyomlar)':grp==='¬Hedef'?'CNF (¬Hedef)':'Çözünürlük Adımları')+'</div>';
+      lastGrp=grp;
+    }
+    var cStr=clauseStr(s.clause);
+    var isEmpty=!s.clause.length;
+    var ruleStr=s.rule;
+    if(s.from&&s.from.length){ruleStr+=' ('+s.from.join(', ')+(s.lit?', "'+s.lit+'" üzerinden':'')+')';};
+    var color=s.rule==='Aksiyom'?'var(--blue)':s.rule==='¬Hedef'?'var(--accent)':isEmpty?'var(--green)':'var(--text)';
+    h+='<div class="ps-step"><span class="ps-num">'+s.num+'.</span>'
+      +'<span class="ps-f" style="color:'+color+'">'+(isEmpty?'⊥ (Boş Kloz)':esc(cStr))+'</span>'
+      +'<span class="ps-rule">'+esc(ruleStr)+'</span></div>';
+  });
+  h+='</div><div class="proof-qed">■ Boş kloz elde edildi.</div></div>';
+  return h;
+}
+
+function renderTableau(hyps, goal){
+  var formulas = hyps.concat(goal?[neg(goal)]:[]);
+  if(!formulas.length) return '<div class="note-block">Formül yok.</div>';
   try{
-    var rowCtr={n:initAsts.length};
-    var startItems=initAsts.map(function(ast,i){return{row:i+1,ast:ast,fromRow:null,sym:null};});
-    var seg=tBuild(startItems,startItems,new Set(),rowCtr);
+    var rc={n:formulas.length};
+    var si=formulas.map(function(ast,i){return{row:i+1,ast:ast,from:null,sym:null};});
+    var seg=tBuild(si,si,new Set(),rc);
+    var ps3=new Set(); tMarkProc(seg,ps3);
+    var closed=tAllClosed(seg);
+    var model=closed?null:tGetModel(seg);
 
-    var procSet=new Set();
-    tMarkProc(seg,procSet);
+    var h='<div class="tab-info">';
+    if(goal) h+=closed?'Tüm yollar kapalı → <strong>Kanıtlandı</strong> (¬hedef ve aksiyomlar çelişkili).':'Açık yol mevcut → <strong>Kanıtlanamıyor.</strong> Açık yol karşı modeli gösterir.';
+    else h+=closed?'Kapalı çizelge.':'Açık yol mevcut.';
+    h+=' &nbsp;<span style="color:var(--text3)">✓=çözümlendi &nbsp; ✕(r,s)=kapalı &nbsp; ○=açık</span></div>';
 
-    var allClosed=tAllClosed(seg);
-    var openModel=allClosed?null:tOpenModel(seg);
-
-    var h='<div class="fi">';
-
-    // Banner
-    var bannerOk=hasThe?allClosed:!allClosed;
-    // For tutarlılık: open=ok. For validity (∴): closed=ok.
-    h+='<div class="res-banner '+(bannerOk?'banner-ok':'banner-fail')+'">'
-      +'<span>'+(allClosed?'&#9632;':'&#9633;')+'</span>';
-    if(hasThe){
-      h+='<span>'+(allClosed?'Geçerli Çıkarım &mdash; Kapalı Çizelge':'Geçersiz Çıkarım &mdash; Açık Çizelge')+'</span>';
-    } else {
-      h+='<span>'+(allClosed?'Tutarsız &mdash; Kapalı Çizelge':'Tutarlı &mdash; Açık Çizelge')+'</span>';
-    }
-    h+='</div>';
-
-    // Info box
-    h+='<div class="tab-info">';
-    if(hasThe){
-      h+='<strong>∴ çıkarımı geçerlilik denetimi:</strong> öncül ve <span style="font-family:var(--mono)">¬</span>sonuç çizelgeye konulur.<br>'
-        +(allClosed
-          ?'Tüm yollar kapalıdır — öncül doğruyken sonucun yanlış olduğu olanaklı bir durum yoktur. Çıkarım <strong>geçerlidir</strong>.'
-          :'En az bir açık yol vardır — öncülün doğru, sonucun yanlış olduğu bir durum vardır. Çıkarım <strong>geçersizdir</strong>.');
-    } else {
-      h+='<strong>Tutarlılık denetimi:</strong> formüller çizelgeye konulur.<br>'
-        +(allClosed
-          ?'Tüm yollar kapalıdır — önerme(ler)in hepsinin aynı anda doğru olduğu olanaklı bir durum yoktur. Küme <strong>tutarsızdır</strong>.'
-          :'En az bir açık yol (&#9675;) bulunmaktadır — önerme(ler) aynı anda doğru olabilir. Küme <strong>tutarlıdır</strong>.');
-    }
-    h+='</div>';
-
-    // Open branch model
-    if(!allClosed&&openModel&&Object.keys(openModel).length>0){
-      h+='<div class="tab-open-model">';
-      Object.keys(openModel).sort().forEach(function(v){
-        var val=openModel[v];
-        h+='<span class="tab-model-var"><span style="font-family:var(--mono);font-size:.7rem">'+v+' = </span>'
-          +'<span class="'+(val?'vD':'vY')+'" style="font-size:.72rem">'+(val?'D':'Y')+'</span></span>';
+    if(!closed&&model&&Object.keys(model).length){
+      h+='<div style="font-family:var(--mono);font-size:.65rem;color:var(--text3);margin-bottom:.35rem">Karşı model:</div>';
+      h+='<div class="tab-model">';
+      Object.keys(model).sort().forEach(function(v){
+        var val=model[v];
+        h+='<span>'+esc(v)+'=<span class="'+(val?'vD':'vY')+'">'+(val?'D':'Y')+'</span></span>';
       });
       h+='</div>';
     }
-
-    // Çözümleme kuralları legend
-    h+='<div style="font-family:var(--mono);font-size:.62rem;color:var(--text2);margin:.6rem 0 .3rem">'
-      +'<strong>Semboller:</strong> &#10003; = çözümlendi &nbsp;|&nbsp; &#215;(r,s) = r ve s satırları çelişiyor, yol kapalı &nbsp;|&nbsp; &#9675; = açık yol</div>';
-
-    // Tableau tree
-    h+='<div style="overflow-x:auto;margin-top:.6rem"><div class="tab-wrap">'+renderTSeg(seg,procSet)+'</div></div>';
-    h+='</div>';
-
-    res.innerHTML=h;
-    chiSec.style.display='';
+    h+='<div class="tab-outer"><div class="tab-wrap"><div class="t-tree">'+renderBranch(seg,ps3)+'</div></div></div>';
+    return h;
   }catch(e){
-    res.innerHTML='<div class="err">'+e.message+'</div>';
-    chiSec.style.display='';
+    return'<div class="err-block">'+esc(e.message)+'</div>';
   }
-};
+}
 
-// ═══════════════════════════════════════════════
-// DRAG & DROP
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// 10. LIVE PREVIEW
+// ═══════════════════════════════════════════════════════
 
-document.addEventListener('dragover',function(e){
-  var s=e.target.closest('.slot');if(s&&dragging){e.preventDefault();s.classList.add('over');}
-});
-document.addEventListener('dragleave',function(e){
-  var s=e.target.closest('.slot');if(s&&!s.contains(e.relatedTarget))s.classList.remove('over');
-});
-document.addEventListener('drop',function(e){
-  var s=e.target.closest('.slot');
-  if(s&&dragging){
-    e.preventDefault();s.classList.remove('over');
-    var path=s.dataset.path;
-    if(!canDrop(dragging.type,path)){
-      s.style.borderColor='var(--accent)';setTimeout(function(){s.style.borderColor='';},600);
-      dragging=null;return;
-    }
-    setAt(s.dataset.pid,path,mkNode(dragging.type,dragging.name));
-    dragging=null;clrAna();renderAll();
+function updatePreview(){
+  var raw = document.getElementById('main-input').value;
+  var parsed = parseEditorText(raw);
+  var el = document.getElementById('preview');
+  if(!parsed.axioms.length && !parsed.goal){
+    el.innerHTML='<div class="preview-label">Önizleme</div><div style="font-family:var(--mono);font-size:.68rem;color:var(--text3)">—</div>';
+    return;
   }
-});
-function attachDrag(el){
-  el.addEventListener('dragstart',function(){
-    if(el.classList.contains('disabled'))return;
-    dragging={type:el.dataset.type,name:el.dataset.name||undefined};
-    el.classList.add('dragging');
+  var h='<div class="preview-label">Önizleme</div>';
+  parsed.axioms.forEach(function(ax){
+    h+='<div class="preview-line"><span class="ax-name">'+esc(ax.name)+':</span> ';
+    if(ax.err) h+='<span class="err-inline">⚠ '+esc(ax.err)+'</span>';
+    else h+='<span class="formula">'+esc(ax.raw)+'</span>';
+    h+='</div>';
   });
-  el.addEventListener('dragend',function(){dragging=null;el.classList.remove('dragging');});
+  if(parsed.goal){
+    h+='<div class="preview-line"><span class="goal-mark">⊢</span> ';
+    if(parsed.goal.err) h+='<span class="err-inline">⚠ '+esc(parsed.goal.err)+'</span>';
+    else h+='<span class="formula">'+esc(parsed.goal.raw)+'</span>';
+    h+='</div>';
+  }
+  el.innerHTML=h;
 }
 
-// ═══════════════════════════════════════════════
-// PALETTE INIT
-// ═══════════════════════════════════════════════
-
-function addVT(name){
-  var c=document.getElementById('vt'),ex=c.querySelectorAll('.tok');
-  for(var i=0;i<ex.length;i++)if(ex[i].dataset.name===name)return;
-  var el=document.createElement('div');
-  el.className='tok tv';el.draggable=true;el.dataset.type='var';el.dataset.name=name;el.textContent=name;
-  attachDrag(el);c.appendChild(el);
-}
-['A','B','C','P','Q','R','S'].forEach(addVT);
-document.querySelectorAll('.tok[data-type]').forEach(attachDrag);
-document.getElementById('cvar').addEventListener('keydown',function(e){
-  if(e.key==='Enter'){var v=e.target.value.trim().toUpperCase();if(v&&/^[A-Z][A-Z0-9_]*$/.test(v)){addVT(v);e.target.value='';}}
+document.getElementById('main-input').addEventListener('input', updatePreview);
+document.getElementById('main-input').addEventListener('keydown', function(e){
+  if(e.ctrlKey && e.key==='Enter'){ e.preventDefault(); runProve(); }
 });
 
-renderAll();
+// ═══════════════════════════════════════════════════════
+// 11. MAIN PROVE
+// ═══════════════════════════════════════════════════════
+
+function runProve(){
+  var raw = document.getElementById('main-input').value;
+  var parsed = parseEditorText(raw);
+  var out = document.getElementById('proof-out');
+
+  // Validate
+  var errors = [];
+  parsed.axioms.forEach(function(ax){ if(ax.err) errors.push(ax.name+': '+ax.err); });
+  if(parsed.goal && parsed.goal.err) errors.push('Hedef: '+parsed.goal.err);
+  if(!parsed.goal) errors.push('Hedef belirtilmedi. "|- formül" veya "⊢ formül" şeklinde yazın.');
+
+  if(errors.length){
+    out.innerHTML='<div class="err-block">'+errors.map(esc).join('<br>')+'</div>';
+    return;
+  }
+
+  out.innerHTML='<div class="waiting">Hesaplanıyor…</div>';
+
+  setTimeout(function(){
+    var hyps = parsed.axioms.filter(function(ax){return ax.ast;}).map(function(ax){return ax.ast;});
+    var axNames = parsed.axioms.map(function(ax){return ax.name;});
+    var goal = parsed.goal.ast;
+    var goalStr = ps(goal);
+
+    var h='<div class="fi">';
+
+    // ── Run engines ──
+    var ndSteps=null, resSteps=null;
+    try{ ndSteps = ndProve(hyps, goal); }catch(e){}
+    try{ resSteps = resolutionProve(hyps, goal); }catch(e){}
+
+    // Tableau for validity check
+    var tabForms = hyps.concat([neg(goal)]);
+    var tabClosed=false;
+    try{
+      var rc={n:tabForms.length};
+      var si=tabForms.map(function(ast,i){return{row:i+1,ast:ast,from:null,sym:null};});
+      tabClosed = tAllClosed(tBuild(si,si,new Set(),rc));
+    }catch(e){}
+
+    var proved = !!(ndSteps || resSteps || tabClosed);
+
+    // ── Verdict ──
+    var hypStrsDisplay = parsed.axioms.map(function(ax){return ax.name+': '+esc(ax.raw);}).join(' &nbsp;·&nbsp; ');
+    h+='<div class="verdict '+(proved?'verdict-ok':'verdict-fail')+'">'
+      +'<span class="verdict-icon">'+(proved?'✓':'✗')+'</span>'
+      +'<span>'+(proved?'Kanıtlandı':'Kanıtlanamıyor')
+      +'<span class="verdict-seq">&ensp;{'
+      +parsed.axioms.map(function(ax){return esc(ax.raw);}).join(', ')+'} ⊢ '+esc(goalStr)+'</span>'
+      +'</span></div>';
+
+    // ── Proof Steps ──
+    h+='<div class="sec-h">Kanıt Adımları — Doğal Çıkarım</div>';
+    h+=renderProofSteps(ndSteps, axNames, goalStr);
+
+    // ── Resolution ──
+    h+='<div class="sec-h">Çözünürlük Kanıtı</div>';
+    h+=renderResolution(resSteps);
+
+    // ── Analytic Tableau ──
+    h+='<div class="sec-h">Analitik Çizelge</div>';
+    h+=renderTableau(hyps, goal);
+
+    // ── Truth Table ──
+    h+='<div class="sec-h">Doğruluk Tablosu</div>';
+    try{ h+=buildTruthTable(hyps, goal); }
+    catch(e){ h+='<div class="err-block">'+esc(e.message)+'</div>'; }
+
+    h+='</div>';
+    out.innerHTML=h;
+  }, 30);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT — seed example
+// ═══════════════════════════════════════════════════════
+
+(function(){
+  var inp = document.getElementById('main-input');
+  inp.value = [
+    '// Hipotetik Silogizm',
+    'A1: P => Q',
+    'A2: Q => R',
+    '|- P => R'
+  ].join('\n');
+  updatePreview();
+})();
 </script>
 </body>
 </html>
