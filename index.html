@@ -3,121 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Feylesof · Mantık Analiz Aracı</title>
+<title>Feylesof · Teorem Kanıtlayıcı</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #fafaf8; --text: #1a1814; --text2: #6c6760; --text3: #9a9490;
-  --accent: #7a1f1f; --border: #d4cfc7; --bg2: #f0ede6;
-  --serif: 'EB Garamond', Georgia, serif;
-  --mono: 'JetBrains Mono', monospace;
+  --bg:     #fafaf8;
+  --text:   #1a1814;
+  --text2:  #6c6760;
+  --text3:  #9a9490;
+  --accent: #7a1f1f;
+  --border: #d4cfc7;
+  --bg2:    #f0ede6;
+  --serif:  'EB Garamond', Georgia, serif;
+  --mono:   'JetBrains Mono', monospace;
+  --toc-w:  224px;
 }
-body {
-  font-family: var(--serif);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 1.05rem;
-  line-height: 1.72;
-}
+html { scroll-behavior: smooth; }
+body { font-family: var(--serif); background: var(--bg); color: var(--text); font-size: 1.05rem; line-height: 1.72; }
 
-.page {
-  max-width: 720px;
+/* ── OUTER SHELL ── */
+.shell {
+  max-width: 1060px;
   margin: 0 auto;
-  padding: 4.5rem 2rem 5rem;
+  padding: 0 1.5rem;
+  display: grid;
+  grid-template-columns: var(--toc-w) 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 0 3rem;
 }
 
-/* ── TITLE ── */
-.title-block {
+/* ── HEADER (spans both columns) ── */
+.site-header {
+  grid-column: 1 / -1;
   border-bottom: 2.5px solid var(--text);
-  padding-bottom: 1.6rem;
-  margin-bottom: 2.8rem;
+  padding: 2.6rem 0 1.6rem;
+  margin-bottom: 2.4rem;
 }
-.title-block h1 {
-  font-size: 2.1rem;
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -.1px;
+.site-header h1 { font-size: 2.1rem; font-weight: 400; line-height: 1.2; letter-spacing: -.1px; }
+.site-header h1 em { font-style: italic; color: var(--accent); }
+.site-header .sub {
+  font-family: var(--mono); font-size: .63rem; color: var(--text3);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  margin-top: .55rem; display: flex; align-items: center; gap: .85rem; flex-wrap: wrap;
 }
-.title-block h1 strong {
-  font-weight: 600;
-}
-.title-block .sub {
-  font-family: var(--mono);
-  font-size: .65rem;
-  color: var(--text3);
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-  margin-top: .6rem;
-  display: flex;
-  align-items: center;
-  gap: .9rem;
-}
-.title-block .sub a {
-  color: var(--text3);
-  text-decoration: none;
-  border-bottom: 1px solid var(--border);
-  transition: color .15s;
-}
-.title-block .sub a:hover { color: var(--text); }
+.site-header .sub a { color: var(--text3); text-decoration: none; border-bottom: 1px solid var(--border); transition: color .15s; }
+.site-header .sub a:hover { color: var(--text); }
 .sep { color: var(--border); }
+
+/* ── SIDEBAR TOC ── */
+.toc-col {
+  grid-column: 1;
+  grid-row: 2;
+  position: sticky;
+  top: 1.5rem;
+  align-self: start;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+  padding-bottom: 2rem;
+}
+.toc-label {
+  font-family: var(--mono); font-size: .57rem; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 1.5px;
+  margin-bottom: .65rem; padding-bottom: .3rem;
+  border-bottom: 1px solid var(--border);
+}
+.toc-list { list-style: none; }
+.toc-list li { line-height: 1; }
+.toc-list a {
+  font-family: var(--mono); font-size: .65rem; color: var(--text2);
+  text-decoration: none; display: block;
+  padding: .27rem 0 .27rem .65rem;
+  border-left: 2px solid transparent;
+  transition: color .12s, border-color .12s;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.toc-list a:hover { color: var(--text); border-left-color: var(--border); }
+.toc-list a.active { color: var(--text); border-left-color: var(--text); font-weight: 500; }
+.toc-list .toc-h3 a { padding-left: 1.3rem; font-size: .61rem; color: var(--text3); }
+.toc-list .toc-h3 a:hover { color: var(--text2); }
+.toc-list .toc-h4 a { padding-left: 2rem; font-size: .58rem; color: var(--text3); opacity: .7; }
+
+/* Scrollbar thin */
+.toc-col::-webkit-scrollbar { width: 3px; }
+.toc-col::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ── MAIN CONTENT ── */
+.content-col {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  padding-bottom: 4rem;
+}
 
 /* ── PROSE ── */
 .prose h1 { display: none; }
 .prose h2 {
-  font-size: 1.55rem;
-  font-weight: 500;
-  margin: 2.5rem 0 .6rem;
-  padding-top: 2.2rem;
-  border-top: 1px solid var(--border);
-  line-height: 1.28;
+  font-size: 1.55rem; font-weight: 500;
+  margin: 2.5rem 0 .6rem; padding-top: 2.2rem;
+  border-top: 1px solid var(--border); line-height: 1.28;
+  scroll-margin-top: 1.8rem;
 }
 .prose h2:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
-.prose h3 {
-  font-size: 1.14rem;
-  font-weight: 500;
-  margin: 1.7rem 0 .4rem;
-}
-.prose h4 {
-  font-family: var(--mono);
-  font-size: .72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text2);
-  margin: 1.4rem 0 .3rem;
-}
+.prose h3 { font-size: 1.14rem; font-weight: 500; margin: 1.7rem 0 .4rem; scroll-margin-top: 1.8rem; }
+.prose h4 { font-family: var(--mono); font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin: 1.4rem 0 .3rem; scroll-margin-top: 1.8rem; }
 .prose p { margin-bottom: .9rem; }
 .prose p:last-child { margin-bottom: 0; }
 .prose a { color: var(--text); border-bottom: 1px solid var(--border); text-decoration: none; transition: border-color .15s; }
 .prose a:hover { border-bottom-color: var(--text); }
+.prose h2 a, .prose h3 a, .prose h4 a { border-bottom: none; color: inherit; }
 .prose strong { font-weight: 600; }
 .prose em { font-style: italic; }
-.prose code {
-  font-family: var(--mono);
-  font-size: .82em;
-  background: var(--bg2);
-  padding: .06em .36em;
-  border: 1px solid var(--border);
-  color: var(--accent);
-}
-.prose pre {
-  background: var(--text);
-  color: #d4cfc7;
-  padding: 1rem 1.3rem;
-  overflow-x: auto;
-  margin: 1.1rem 0;
-  border-left: 3px solid var(--accent);
-}
+.prose code { font-family: var(--mono); font-size: .82em; background: var(--bg2); padding: .06em .36em; border: 1px solid var(--border); color: var(--accent); }
+.prose pre { background: var(--text); color: #d4cfc7; padding: 1rem 1.3rem; overflow-x: auto; margin: 1.1rem 0; border-left: 3px solid var(--accent); }
 .prose pre code { background: none; border: none; padding: 0; color: inherit; font-size: .83rem; line-height: 1.6; }
-.prose blockquote {
-  border-left: 2.5px solid var(--border);
-  padding: .35rem 0 .35rem 1.1rem;
-  margin: 1rem 0;
-  color: var(--text2);
-  font-style: italic;
-}
+.prose blockquote { border-left: 2.5px solid var(--border); padding: .35rem 0 .35rem 1.1rem; margin: 1rem 0; color: var(--text2); font-style: italic; }
 .prose ul, .prose ol { padding-left: 1.45rem; margin-bottom: .9rem; }
 .prose li { margin-bottom: .28rem; line-height: 1.6; }
 .prose li::marker { color: var(--text3); }
@@ -126,86 +127,183 @@ body {
 .prose table td { border-bottom: 1px solid var(--border); padding: .28rem .65rem; vertical-align: top; }
 .prose hr { border: none; border-top: 1px solid var(--border); margin: 1.8rem 0; }
 .prose img { max-width: 100%; border: 1px solid var(--border); display: block; margin: 1rem 0; }
+/* Hide shields.io badge lines */
+.badge-line { display: none !important; }
 
 /* ── FOOTER ── */
-.footer {
-  margin-top: 3.5rem;
-  padding-top: 1.2rem;
+.site-footer {
+  grid-column: 1 / -1;
   border-top: 1px solid var(--border);
-  font-family: var(--mono);
-  font-size: .63rem;
-  color: var(--text3);
-  letter-spacing: .7px;
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: .4rem;
+  padding: 1.2rem 0;
+  margin-top: .5rem;
+  font-family: var(--mono); font-size: .63rem; color: var(--text3);
+  letter-spacing: .7px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: .4rem;
 }
-.footer a { color: var(--text3); text-decoration: none; border-bottom: 1px solid var(--border); transition: color .15s; }
-.footer a:hover { color: var(--text); }
+.site-footer a { color: var(--text3); text-decoration: none; border-bottom: 1px solid var(--border); transition: color .15s; }
+.site-footer a:hover { color: var(--text); }
 
-/* ── LOADING / ERR ── */
-.loading {
-  font-family: var(--mono);
-  font-size: .76rem;
-  color: var(--text3);
-  display: flex;
-  align-items: center;
-  gap: .55rem;
-}
-.loading::before {
-  content: '';
-  width: .52rem; height: .52rem;
-  border: 1.5px solid var(--border);
-  border-top-color: var(--text);
-  border-radius: 50%;
-  animation: spin .7s linear infinite;
-}
+/* ── LOADING ── */
+.loading { font-family: var(--mono); font-size: .76rem; color: var(--text3); display: flex; align-items: center; gap: .55rem; }
+.loading::before { content: ''; width: .52rem; height: .52rem; border: 1.5px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.load-err {
-  font-family: var(--mono);
-  font-size: .75rem;
-  color: var(--accent);
-  padding: .8rem;
-  background: #fff8f8;
-  border: 1px solid #c4a0a0;
+.load-err { font-family: var(--mono); font-size: .75rem; color: var(--accent); padding: .8rem; background: #fff8f8; border: 1px solid #c4a0a0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 740px) {
+  .shell { grid-template-columns: 1fr; }
+  .toc-col { display: none; }
+  .site-header, .content-col, .site-footer { grid-column: 1; }
+  .content-col { grid-row: 2; }
 }
 </style>
 </head>
 <body>
-<div class="page">
+<div class="shell">
 
-  <div class="title-block">
-    <h1>Feylesof · <i style="color: #7a1f1f">Teorem Kanıtlayıcı</i></h1>
+  <!-- HEADER -->
+  <header class="site-header">
+    <h1>Feylesof &middot; <em>Teorem Kanıtlayıcı</em></h1>
     <div class="sub">
       <span>Geliştirici: Yasir Eymen Kayabaşı</span>
-      <span class="sep">·</span>
-      <a href="./onerme-olusturucu.html">Araca Git →</a>
+      <span class="sep">&middot;</span>
+      <a href="./onerme-olusturucu.html">Araca Git &rarr;</a>
+      <span class="sep">&middot;</span>
+      <a href="https://github.com/yaso09/feylesof" target="_blank" rel="noopener">GitHub</a>
     </div>
-  </div>
+  </header>
 
-  <div class="prose" id="prose">
-    <div class="loading">README.md okunuyor…</div>
-  </div>
+  <!-- SIDEBAR TOC -->
+  <nav class="toc-col" id="toc-col">
+    <div class="toc-label">İçindekiler</div>
+    <ul class="toc-list" id="toc-list">
+      <li style="font-family:var(--mono);font-size:.62rem;color:var(--text3);padding:.25rem .65rem">Yükleniyor&hellip;</li>
+    </ul>
+  </nav>
 
-  <div class="footer">
-    <span>Yasir Eymen Kayabaşı</span>
-    <a href="./onerme-olusturucu.html">onerme-olusturucu.html →</a>
-  </div>
+  <!-- MAIN CONTENT -->
+  <main class="content-col">
+    <div class="prose" id="prose">
+      <div class="loading">README.md okunuyor&hellip;</div>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <span>Yasir Eymen Kayabaşı &middot; GPL-3.0</span>
+    <a href="./onerme-olusturucu.html">onerme-olusturucu.html &rarr;</a>
+  </footer>
 
 </div>
-
 <script>
+// ── slugify: Türkçe karakterleri ASCII'ye dönüştür ──
+function slugify(text) {
+  var TR = {
+    '\u00e7':'c','\u00c7':'c','\u011f':'g','\u011e':'g',
+    '\u0131':'i','\u0130':'i','\u00f6':'o','\u00d6':'o',
+    '\u015f':'s','\u015e':'s','\u00fc':'u','\u00dc':'u',
+    '\u00e2':'a','\u00ee':'i','\u00fb':'u'
+  };
+  return text
+    .replace(/[çÇğĞıİöÖşŞüÜâîû]/g, function(c){ return TR[c]||c; })
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+// ── Özel renderer ──
+var renderer = new marked.Renderer();
+var idCount  = {};
+
+renderer.heading = function(text, level) {
+  var plain = text.replace(/<[^>]+>/g, '');
+  var base  = slugify(plain);
+  idCount[base] = (idCount[base]||0) + 1;
+  var id = idCount[base] > 1 ? base+'-'+idCount[base] : base;
+  return '<h'+level+' id="'+id+'">'+text+'</h'+level+'>\n';
+};
+
+renderer.link = function(href, title, text) {
+  var h = href || '';
+  if (h.charAt(0) === '#') h = '#' + slugify(h.slice(1));
+  var out = '<a href="'+h+'"';
+  if (title) out += ' title="'+title+'"';
+  if (h.charAt(0) !== '#' && !h.match(/^\.\//)) out += ' target="_blank" rel="noopener"';
+  out += '>'+text+'</a>';
+  return out;
+};
+
+renderer.paragraph = function(text) {
+  if (text.indexOf('shields.io') !== -1) return '<p class="badge-line">'+text+'</p>\n';
+  return '<p>'+text+'</p>\n';
+};
+
 marked.setOptions({ breaks: false, gfm: true });
+
+// ── TOC builder ──
+function buildTOC() {
+  var headings = document.querySelectorAll('.prose h2, .prose h3, .prose h4');
+  var list = document.getElementById('toc-list');
+  if (!headings.length) { list.innerHTML = ''; return; }
+
+  var html = '';
+  headings.forEach(function(h) {
+    var level = parseInt(h.tagName.slice(1));
+    var id    = h.id;
+    var text  = h.textContent;
+    var cls   = level === 2 ? '' : level === 3 ? ' toc-h3' : ' toc-h4';
+    html += '<li class="'+cls.trim()+'"><a href="#'+id+'" data-id="'+id+'">'+text+'</a></li>';
+  });
+  list.innerHTML = html;
+}
+
+// ── Scroll spy ──
+function initScrollSpy() {
+  var links = document.querySelectorAll('.toc-list a[data-id]');
+  if (!links.length) return;
+
+  var headings = [];
+  links.forEach(function(a) {
+    var el = document.getElementById(a.dataset.id);
+    if (el) headings.push({ el: el, a: a });
+  });
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        links.forEach(function(a) { a.classList.remove('active'); });
+        var active = document.querySelector('.toc-list a[data-id="'+entry.target.id+'"]');
+        if (active) {
+          active.classList.add('active');
+          // Scroll TOC to keep active item visible
+          var toc = document.getElementById('toc-col');
+          var aTop = active.offsetTop;
+          var tocH = toc.clientHeight;
+          if (aTop < toc.scrollTop || aTop > toc.scrollTop + tocH - 40) {
+            toc.scrollTop = aTop - tocH / 2;
+          }
+        }
+      }
+    });
+  }, { rootMargin: '-8% 0px -80% 0px', threshold: 0 });
+
+  headings.forEach(function(h) { observer.observe(h.el); });
+}
+
+// ── Fetch & render ──
 fetch('./README.md')
   .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
   .then(function(md){
-    document.getElementById('prose').innerHTML = marked.parse(md);
-    console.log(marked.parse(md));
+    md = md.replace(/^#\s+.+\n?/m, '');       // H1'i gizle
+    document.getElementById('prose').innerHTML = marked.parse(md, { renderer: renderer });
+    buildTOC();
+    initScrollSpy();
   })
   .catch(function(e){
     document.getElementById('prose').innerHTML =
-      '<div class="load-err">README.md yüklenemedi: '+e.message+'</div>';
+      '<div class="load-err">README.md y\u00fcklenemedi: '+e.message+'</div>';
+    document.getElementById('toc-list').innerHTML = '';
   });
 </script>
 </body>
